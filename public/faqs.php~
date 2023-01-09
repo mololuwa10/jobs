@@ -1,7 +1,0 @@
-<?php 
-//require '../functions/loadTemplate.php';
-//
-//$title = 'Jo\'s Jobs - FAQs';
-//$output = loadTemplate('../templates/faqs.html.php' , []);
-//require '../templates/layout.html.php';
-?>
