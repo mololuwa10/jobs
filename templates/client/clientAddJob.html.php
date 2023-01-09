@@ -7,7 +7,6 @@
             <li><a href="clientJobs">Jobs</a></li>
         </ul>
     </section>
-
     <section class="right">
 
         <h2>Add Job</h2>
@@ -41,8 +40,6 @@
         <input type="submit" name="submit" value="Add"/>
 
         </form>
-
-
         <?php
         }
         ?>
