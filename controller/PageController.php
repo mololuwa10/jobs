@@ -4,7 +4,7 @@ class PageController
 {
     public function faqs(): array
     {
-        return ['template' => '../templates/faqs.html.php',
+        return ['template' => '../templates/layout/faqs.html.php',
             'variables' => [],
             'title' => 'Jo\'s Jobs - FAQs'
         ];
@@ -17,14 +17,16 @@ class PageController
 
         $jobsTable = new databaseTable('job', 'id');
         $date = new DateTime();
+
         $criteria = [
             'date' => $date->format('Y-m-d'),
             'id' => $_GET['id']
         ];
+
         $jobs = $jobsTable->customFind('categoryId = :id AND closingDate > :date', $criteria);
         $currentCategory = $categoriesTable->find('id', $_GET['id']);
 
-        return ['template' => '../templates/category.html.php',
+        return ['template' => '../templates/layout/category.html.php',
             'variables' => ['jobs' => $jobs, 'categories' => $categories, 'currentCategory' => $currentCategory],
             'title' => 'Jo\'s Jobs - Categories'
         ];
@@ -50,7 +52,7 @@ class PageController
         $stmt .= ' ORDER BY j.closingDate ASC LIMIT 10';
         $jobs = $jobsTable->custom($stmt, $criteria, false);
 
-        return ['template' => '../templates/index.html.php',
+        return ['template' => '../templates/layout/index.html.php',
             'variables' => ['jobs' => $jobs, 'locations' => $locations],
             'title' => 'Jo\'s Jobs - Home'
         ];
@@ -61,7 +63,7 @@ class PageController
         $categoriesTable = new databaseTable('category', 'id');
         $categories = $categoriesTable->findAll();
 
-        return ['template' => '../templates/aboutUs.html.php',
+        return ['template' => '../templates/layout/aboutUs.html.php',
             'variables' => ['categories' => $categories],
             'title' => 'Jo\'s Jobs - About us'
         ];
@@ -101,7 +103,7 @@ class PageController
             }
         }
 
-        return ['template' => '../templates/contact.html.php',
+        return ['template' => '../templates/layout/contact.html.php',
             'variables' => ['categories' => $categories],
             'title' => 'Jo\'s Jobs - Contact Us'
         ];
@@ -138,7 +140,7 @@ class PageController
             }
         }
 
-        return ['template' => '../templates/apply.html.php',
+        return ['template' => '../templates/layout/apply.html.php',
             'variables' => ['job' => $job, 'categories' => $categories],
             'title' => 'Jo\'s Jobs - Apply'
         ];

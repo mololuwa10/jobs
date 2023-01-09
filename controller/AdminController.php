@@ -32,7 +32,7 @@ class AdminController
             }
         }
 
-        return ['template' => '../templates/adminLogin.html.php',
+        return ['template' => '../templates/admin/adminLogin.html.php',
             'variables' => [],
             'title' => 'Jo\'s Jobs - Admin Login'
         ];
@@ -41,7 +41,7 @@ class AdminController
     public function adminIndex(): array
     {
         adminValidation();
-        return ['template' => '../templates/adminIndex.html.php',
+        return ['template' => '../templates/admin/adminIndex.html.php',
             'variables' => [],
             'title' => 'Jo\'s Jobs - Admin Home'
         ];
@@ -69,7 +69,7 @@ class AdminController
             $jobs = $jobsTable->custom($stmt, $criteria, false);
 
         }
-        return ['template' => '../templates/jobs.html.php',
+        return ['template' => '../templates/admin/jobs.html.php',
             'variables' => ['jobs' => $jobs, 'category' => $category],
             'title' => 'Jo\'s Jobs - Job List'
         ];
@@ -117,7 +117,7 @@ class AdminController
                 }
             }
         }
-        return ['template' => '../templates/addUser.html.php',
+        return ['template' => '../templates/admin/addUser.html.php',
             'variables' => [],
             'title' => 'Jo\'s Jobs - Add User'
         ];
@@ -155,7 +155,7 @@ class AdminController
             }
         }
 
-        return ['template' => '../templates/addjob.html.php',
+        return ['template' => '../templates/admin/addjob.html.php',
             'variables' => ['categories' => $categories],
             'title' => 'Jo\'s Jobs - Add Job'
         ];
@@ -184,11 +184,14 @@ class AdminController
 
             $categoriesTable = new databaseTable('category', 'id');
             $stmt = $categoriesTable->findAll();
+
+            $template = ($_SESSION['userDetails']['userType'] == 'admin') ? '../templates/admin/editJob.html.php' : '../templates/client/clientEditJob.html.php';
+            $title = ($_SESSION['userDetails']['userType'] == 'admin') ? 'Jo\'s Jobs - Admin Edit Jobs' : 'Jo\'s Jobs - Client Edit Jobs';
         }
 
-        return ['template' => '../templates/editJob.html.php',
+        return ['template' => $template,
             'variables' => ['job' => $job, 'stmt' => $stmt],
-            'title' => 'Jo\'s Jobs - Edit Job'
+            'title' => $title
         ];
     }
 
@@ -207,7 +210,7 @@ class AdminController
             }
         }
 
-        return ['template' => '../templates/addcategory.html.php',
+        return ['template' => '../templates/admin/addcategory.html.php',
             'variables' => [],
             'title' => 'Jo\'s Jobs - Add Category'
         ];
@@ -235,7 +238,7 @@ class AdminController
             $categories = $categoryTable->findAll();
         }
 
-        return ['template' => '../templates/adminCategories.html.php',
+        return ['template' => '../templates/admin/adminCategories.html.php',
             'variables' => ['categories' => $categories],
             'title' => 'Jo\'s Jobs - Category'
         ];
@@ -261,7 +264,7 @@ class AdminController
             $stmt = 'SELECT * FROM applicants WHERE jobId = :id';
             $applicants = $jobsTable->custom($stmt, ['id' => $_GET['id']], false);
 
-            $template = ($_SESSION['userDetails']['userType'] == 'admin') ? '../templates/applicants.html.php' : '../templates/clientsApplicants.html.php';
+            $template = ($_SESSION['userDetails']['userType'] == 'admin') ? '../templates/admin/applicants.html.php' : '../templates/client/clientsApplicants.html.php';
             $title = ($_SESSION['userDetails']['userType'] == 'admin') ? 'Jo\'s Jobs - Applicants' : 'Jo\'s Jobs - Client Applicants';
 
         }
@@ -295,7 +298,7 @@ class AdminController
             $contacts = $contactTable->custom($stmt, $criteria, false);
         }
 
-        return ['template' => '../templates/manageEnquiry.html.php',
+        return ['template' => '../templates/admin/manageEnquiry.html.php',
             'variables' => ['contacts' => $contacts],
             'title' => 'Jo\'s Jobs - Enquiries List'
         ];
@@ -303,49 +306,51 @@ class AdminController
 
     public function clientIndex(): array
     {
-        return ['template' => '../templates/clientIndex.html.php',
-            'variables' => [],
-            'title' => 'Jo\'s Jobs - Client Home'
-        ];
+        if (isset($_SESSION['loggedin']) && $_SESSION['loggedin']) {
+            return ['template' => '../templates/client/clientIndex.html.php',
+                'variables' => [],
+                'title' => 'Jo\'s Jobs - Client Home'
+            ];
+        }
+
     }
 
     public function clientJobs(): array
     {
-        $jobsTable = new databaseTable('job', 'id');
-
-        $categoryTable = new databaseTable('category', 'id');
-        $category = $categoryTable->findAll();
-
-        $stmt = 'SELECT j.id, j.title, j.description, j.salary, j.categoryId, j.archive, j.userId, (SELECT count(*) FROM applicants WHERE jobId = j.id) as count, c.id as catId, u.userId as userId, u.userType, c.name
-        FROM job j 
-        JOIN user u ON u.userId = j.userId
-        LEFT JOIN category c ON c.id = j.categoryId
-        ';
-
-        $criteria = [];
-
         if (isset($_SESSION['loggedin']) && $_SESSION['loggedin']) {
+            $jobsTable = new databaseTable('job', 'id');
+
+            $categoryTable = new databaseTable('category', 'id');
+            $category = $categoryTable->findAll();
+
+            $stmt = 'SELECT j.id, j.title, j.description, j.salary, j.categoryId, j.archive, j.userId, (SELECT count(*) FROM applicants WHERE jobId = j.id) as count, c.id as catId, u.userId as userId, u.userType, c.name
+                    FROM job j 
+                    JOIN user u ON u.userId = j.userId
+                    LEFT JOIN category c ON c.id = j.categoryId';
+
+            $criteria = [];
+
             if ($_SESSION['userDetails']['userType'] == 'client') {
                 $stmt .= ' WHERE j.userId = :userId';
                 $criteria = [
                     'userId' => $_SESSION['userDetails']['userId']
                 ];
             }
-        }
 
 
-        if (isset($_GET['id'])) {
-            if ($_SESSION['userDetails']['userType'] == 'client') {
-                $stmt .= ' AND j.categoryId = :id ';
-            } else {
-                $stmt .= ' WHERE j.categoryId = :id ';
+            if (isset($_GET['id'])) {
+                if ($_SESSION['userDetails']['userType'] == 'client') {
+                    $stmt .= ' AND j.categoryId = :id ';
+                } else {
+                    $stmt .= ' WHERE j.categoryId = :id ';
+                }
+                $criteria['id'] = $_GET['id'];
             }
-            $criteria['id'] = $_GET['id'];
+
+            $jobs = $jobsTable->custom($stmt, $criteria, false);
         }
 
-        $jobs = $jobsTable->custom($stmt, $criteria, false);
-
-        return ['template' => '../templates/clientJobs.html.php',
+        return ['template' => '../templates/client/clientJobs.html.php',
             'variables' => ['jobs' => $jobs, 'category' => $category],
             'title' => 'Jo\'s Jobs - Client Home'
         ];
@@ -353,25 +358,27 @@ class AdminController
 
     public function clientAddJob(): array
     {
-        $categoriesTable = new databaseTable('category', 'id');
-        $categories = $categoriesTable->findAll();
+        if (isset($_SESSION['loggedin']) && $_SESSION['loggedin']) {
+            $categoriesTable = new databaseTable('category', 'id');
+            $categories = $categoriesTable->findAll();
 
-        if (isset($_POST['submit'])) {
-            $jobsTable = new databaseTable('job', 'id');
-            $criteria = [
-                'title' => $_POST['title'],
-                'description' => $_POST['description'],
-                'salary' => $_POST['salary'],
-                'location' => $_POST['location'],
-                'categoryId' => $_POST['categoryId'],
-                'closingDate' => $_POST['closingDate'],
-                'userId' => $_SESSION['userDetails']['userId']
-            ];
-            $jobs = $jobsTable->save($criteria);
-            echo 'Job Added';
+            if (isset($_POST['submit'])) {
+                $jobsTable = new databaseTable('job', 'id');
+                $criteria = [
+                    'title' => $_POST['title'],
+                    'description' => $_POST['description'],
+                    'salary' => $_POST['salary'],
+                    'location' => $_POST['location'],
+                    'categoryId' => $_POST['categoryId'],
+                    'closingDate' => $_POST['closingDate'],
+                    'userId' => $_SESSION['userDetails']['userId']
+                ];
+                $jobs = $jobsTable->save($criteria);
+                echo 'Job Added';
+            }
         }
 
-        return ['template' => '../templates/clientAddJob.html.php',
+        return ['template' => '../templates/client/clientAddJob.html.php',
             'variables' => ['categories' => $categories],
             'title' => 'Jo\'s Jobs - Client Home'
         ];
@@ -394,7 +401,7 @@ class AdminController
             }
         }
 
-        return ['template' => '../templates/editCategory.html.php',
+        return ['template' => '../templates/admin/editCategory.html.php',
             'variables' => ['currentCategory' => $currentCategory],
             'title' => 'Jo\'s Jobs - Client Home'
         ];

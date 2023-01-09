@@ -57,6 +57,6 @@ if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] && $_SESSION['userDeta
 </nav>
 <img src="/images/randombanner.php"/>
 <?= $output ?? '' ?>
-<?php require '../public/footer.php' ?>
+<?php require 'footer.html.php' ?>
 </body>
 </html>

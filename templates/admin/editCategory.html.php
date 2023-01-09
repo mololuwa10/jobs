@@ -1,5 +1,5 @@
 <main class="sidebar">
-    <?php require '../templates/admin-sidebar.html.php' ?>
+    <?php require 'admin-sidebar.html.php' ?>
     <section class="right">
         <h2>Edit Category</h2>
         <form action="" method="POST">

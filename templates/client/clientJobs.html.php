@@ -1,13 +1,5 @@
 <main class="sidebar">
-    <?php
-    if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true) {
-    ?>
-    <section class="left">
-        <ul>
-            <li><a href="clientJobs">Jobs</a></li>
-        </ul>
-    </section>
-
+    <?php require 'client-sidebar.html.php' ?>
     <section class="right">
 
         <h2>Jobs</h2>
@@ -43,7 +35,7 @@
             echo '<td style="text-align: center">' . $job['title'] . '</td>';
             echo '<td style="text-align: center">' . $job['name'] . '</td>';
             echo '<td>' . $job['salary'] . '</td>';
-            echo '<td><a style="float: right" href="editjob.html.php?id=' . $job['id'] . '">Edit</a></td>';
+            echo '<td><a style="float: right" href="editjob?id=' . $job['id'] . '">Edit</a></td>';
             echo '<td><a style="float: right" href="applicants?id=' . $job['id'] . '">View applicants (' . $job['count'] . ')</a></td>';
             echo '<td><form method="post" action="archiveJob">';
             echo '<input type="hidden" name="id" value="' . $job['id'] . '" />';
@@ -61,21 +53,6 @@
 
         echo '</thead>';
         echo '</table>';
-
-        } else {
-            ?>
-            <h2>Log in</h2>
-            <form action="adminIndex" method="post" style="padding: 40px">
-                <label>Enter Username</label>
-                <input type="text" name="username"/>
-
-                <label>Enter Password</label>
-                <input type="password" name="password"/>
-
-                <input type="submit" name="submit" value="Log In"/>
-            </form>
-            <?php
-        }
         ?>
 
     </section>

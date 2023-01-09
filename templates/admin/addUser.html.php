@@ -1,6 +1,5 @@
 <main class="sidebar">
-    <?php require '../templates/admin-sidebar.html.php' ?>
-
+    <?php require 'admin-sidebar.html.php' ?>
     <h2>Add Admin/Client User</h2>
     <form action="addUser" method="post" style="padding: 40px">
         <label>Enter Full Name</label>

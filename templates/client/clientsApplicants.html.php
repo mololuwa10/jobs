@@ -1,12 +1,5 @@
 <main class="sidebar">
-    <?php
-    if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true) {
-    ?>
-    <section class="left">
-        <ul>
-            <li><a href="clientJobs">Jobs</a></li>
-        </ul>
-    </section>
+    <?php require 'client-sidebar.html.php' ?>
     <section class="right">
 
         <h2>Applicants for <?= $job['title']; ?></h2>
@@ -32,19 +25,6 @@
 
         echo '</thead>';
         echo '</table>';
-
-        } else {
-            ?>
-            <h2>Log in</h2>
-
-            <form action="adminIndex" method="post">
-                <label>Password</label>
-                <input type="password" name="password"/>
-
-                <input type="submit" name="submit" value="Log In"/>
-            </form>
-            <?php
-        }
         ?>
 
     </section>

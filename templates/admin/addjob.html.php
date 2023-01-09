@@ -1,5 +1,6 @@
 <main class="sidebar">
-    <?php require '../templates/admin-sidebar.html.php' ?>
+    <?php require 'admin-sidebar.html.php' ?>
+
     <section class="right">
 
         <h2>Add Job</h2>
