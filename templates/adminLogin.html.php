@@ -1,5 +1,5 @@
 <main class="sidebar">
-    <form action="adminIndex" method="post" style="padding: 40px">
+    <form action="adminLogin" method="post" style="padding: 40px">
         <label>Enter Username</label>
         <input type="text" name="username"/>
 

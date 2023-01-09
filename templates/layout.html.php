@@ -1,5 +1,7 @@
 <?php
-
+if (!isset($_SESSION)) {
+    session_start();
+}
 ?>
 <!DOCTYPE html>
 <html>
@@ -23,7 +25,7 @@
 
 </header>
 <?php
-if (isset($_SESSION['loggedin']) && $_SESSION['userDetails']['userType'] == 'admin') {
+if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] && $_SESSION['userDetails']['userType'] == 'admin') {
     echo '<div class="log-out"><p>Hello, ' . $_SESSION['userDetails']['fullName'] . ' .<a href="../admin/adminIndex">Admin-Home</a> <a href="logOut">Log-out</a></div></p>';
 } else if (isset($_SESSION['loggedin']) && $_SESSION['userDetails']['userType'] == 'client') {
     echo '<div class="log-out"><p>Hello, ' . $_SESSION['userDetails']['fullName'] . ' .<a href="../admin/clientIndex">Client-Home</a> <a href="logOut">Log-out</a></div></p>';
