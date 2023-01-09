@@ -1,3 +1,6 @@
+<?php
+
+?>
 <!DOCTYPE html>
 <html>
 <head>
@@ -26,7 +29,7 @@ if (isset($_SESSION['loggedin']) && $_SESSION['userDetails']['userType'] == 'adm
     echo '<div class="log-out"><p>Hello, ' . $_SESSION['userDetails']['fullName'] . ' .<a href="../admin/clientIndex">Client-Home</a> <a href="logOut">Log-out</a></div></p>';
 } else {
     echo '<div class="admin-login">
-                   <button><a href="../admin/adminIndex" style="color: white">Admin/Client Login</a></button>
+                   <button><a href="../admin/adminLogin" style="color: white">Admin/Client Login</a></button>
               </div>';
 }
 ?>

@@ -40,7 +40,7 @@ class PageController
         $stmt = 'SELECT j.*, c.id as catId
         FROM job j
         LEFT JOIN category c ON c.id = j.categoryId
-        WHERE j.archive IS NULL';
+        WHERE (j.archive = 0 OR j.archive IS NULL)';
 
         if (isset($_GET["location"])) {
             $stmt .= ' AND j.location = :location';
@@ -48,7 +48,6 @@ class PageController
         }
 
         $stmt .= ' ORDER BY j.closingDate ASC LIMIT 10';
-
         $jobs = $jobsTable->custom($stmt, $criteria, false);
 
         return ['template' => '../templates/index.html.php',
@@ -143,6 +142,16 @@ class PageController
             'variables' => ['job' => $job, 'categories' => $categories],
             'title' => 'Jo\'s Jobs - Apply'
         ];
+    }
+
+    public function logOut(): void
+    {
+        if (!isset($_SESSION)) {
+            session_start();
+        }
+        unset($_SESSION);
+        session_destroy();
+        header("Location: ../home");
     }
 }
 

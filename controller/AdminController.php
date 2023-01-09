@@ -2,34 +2,44 @@
 
 class AdminController
 {
+    public function adminLogin(): array
+    {
+        return ['template' => '../templates/adminLogin.html.php',
+            'variables' => [],
+            'title' => 'Jo\'s Jobs - Admin Login'
+        ];
+    }
+
     public function adminIndex(): array
     {
-        adminValidation();
+//        adminValidation();
         $errMsgArray = [];
         $errorFlag = false;
-        if (isset($_POST['submit'])) {
-            $userName = $_POST['username'];
-            $password = $_POST['password'];
+        if (isset($_SESSION['loggedin']) && $_SESSION['loggedin']) {
+            if (isset($_POST['submit'])) {
+                $userName = $_POST['username'];
+                $password = $_POST['password'];
 
-            if ($userName == '' || $password == '') {
-                $errMsgArray[] = 'YOU MUST ENTER A VALID CREDENTIAL';
-                $errorFlag = true;
-            }
-
-            $userAdminTable = new databaseTable('user', 'userId');
-            $user = $userAdminTable->find('userName', $userName);
-
-            if ($user) {
-                $_SESSION['loggedin'] = $user['userId'];
-                $_SESSION['userDetails'] = $user;
-                if (password_verify($password, $user['password']) && $user['userType'] == 'client') {
-                    header("Location: clientIndex");
-                } else if ($user['userType'] == 'admin') {
-                    header("Location: adminIndex");
+                if ($userName == '' || $password == '') {
+                    $errMsgArray[] = 'YOU MUST ENTER A VALID CREDENTIAL';
+                    $errorFlag = true;
                 }
-            } else {
-                echo 'CREDENTIALS ARE WRONG!! TRY AGAIN';
-                $errorFlag = true;
+
+                $userAdminTable = new databaseTable('user', 'userId');
+                $user = $userAdminTable->find('userName', $userName);
+
+                if ($user) {
+                    $_SESSION['loggedin'] = $user['userId'];
+                    $_SESSION['userDetails'] = $user;
+                    if (password_verify($password, $user['password']) && $user['userType'] == 'client') {
+                        header("Location: clientIndex");
+                    } else if ($user['userType'] == 'admin') {
+                        header("Location: adminIndex");
+                    }
+                } else {
+                    echo 'CREDENTIALS ARE WRONG!! TRY AGAIN';
+                    $errorFlag = true;
+                }
             }
         }
 
