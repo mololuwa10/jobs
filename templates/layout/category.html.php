@@ -17,6 +17,7 @@
 
         <ul class="listing">
             <?php
+            $jobs = $jobs ?? [];
             foreach ($jobs as $job) {
                 if ($job['archive'] == 0) {
                     echo '<li>';

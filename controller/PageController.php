@@ -24,6 +24,7 @@ class PageController
         ];
 
         $jobs = $jobsTable->customFind('categoryId = :id AND closingDate > :date', $criteria);
+
         $currentCategory = $categoriesTable->find('id', $_GET['id']);
 
         return ['template' => '../templates/layout/category.html.php',

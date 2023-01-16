@@ -21,17 +21,21 @@ class AdminController
             if ($user) {
                 $_SESSION['loggedin'] = $user['userId'];
                 $_SESSION['userDetails'] = $user;
-                if (password_verify($password, $user['password']) && $user['userType'] == 'client') {
-                    header("Location: clientIndex");
-                } else if ($user['userType'] == 'admin') {
-                    header("Location: adminIndex");
+                if (password_verify($password, $user['password']) && $userName == $user['userName']) {
+                    $_SESSION['password_verified'] = true;
+                    if ($user['userType'] == 'client') {
+                        header("Location: clientIndex");
+                    } elseif ($user['userType'] == 'admin') {
+                        header("Location: adminIndex");
+                    }
+                } else {
+                    $_SESSION['password_verified'] = false;
+                    echo 'CREDENTIALS ARE WRONG!! TRY AGAIN';
+                    $errorFlag = true;
                 }
-            } else {
-                echo 'CREDENTIALS ARE WRONG!! TRY AGAIN';
-                $errorFlag = true;
             }
-        }
 
+        }
         return ['template' => '../templates/admin/adminLogin.html.php',
             'variables' => [],
             'title' => 'Jo\'s Jobs - Admin Login'
@@ -130,7 +134,7 @@ class AdminController
         }
         unset($_SESSION);
         session_destroy();
-        header("Location: ../home");
+        header("Location: adminLogin");
     }
 
     public function addJob(): array

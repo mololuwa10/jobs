@@ -23,5 +23,6 @@ if ($_SERVER['REQUEST_URI'] !== '/') {
 $title = $page['title'];
 $output = loadTemplate('../templates/' . $page['template'], $page['variables']);
 
+
 require '../templates/layout/layout.html.php';
 ?>
