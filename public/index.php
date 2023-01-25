@@ -1,9 +1,13 @@
 <?php
 session_start();
-require '../functions/loadTemplate.php';
-require '../controller/PageController.php';
 
-$jobsTable = new databaseTable('job', 'id');
+use controller\PageController;
+use Database\DatabaseTable;
+
+require '../functions/loadTemplate.php';
+require '../autoload.php';
+
+$jobsTable = new DatabaseTable('job', 'id');
 $pageController = new PageController();
 
 if ($_SERVER['REQUEST_URI'] !== '/') {
@@ -11,8 +15,8 @@ if ($_SERVER['REQUEST_URI'] !== '/') {
     if (str_contains($functionName, '/')) {
         $r = explode('/', $functionName);
         $controller = ucfirst($r[0]) . 'Controller';
-        require "../controller/$controller.php";
-        $pageController = new $controller();
+        $loadController = 'controller\\' . $controller;
+        $pageController = new $loadController();
         $functionName = $r[1] ?? 'home';
     }
     $page = $pageController->$functionName();
@@ -22,7 +26,5 @@ if ($_SERVER['REQUEST_URI'] !== '/') {
 
 $title = $page['title'];
 $output = loadTemplate('../templates/' . $page['template'], $page['variables']);
-
-
 require '../templates/layout/layout.html.php';
-?>
+

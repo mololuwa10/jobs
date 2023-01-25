@@ -1,5 +1,10 @@
 <?php
 
+namespace controller;
+
+use Database\DatabaseTable;
+use DateTime;
+
 class PageController
 {
     public function faqs(): array
@@ -12,10 +17,10 @@ class PageController
 
     public function categories(): array
     {
-        $categoriesTable = new databaseTable('category', 'id');
+        $categoriesTable = new DatabaseTable('category', 'id');
         $categories = $categoriesTable->findAll();
 
-        $jobsTable = new databaseTable('job', 'id');
+        $jobsTable = new DatabaseTable('job', 'id');
         $date = new DateTime();
 
         $criteria = [
@@ -35,7 +40,7 @@ class PageController
 
     public function home(): array
     {
-        $jobsTable = new databaseTable('job', 'id');
+        $jobsTable = new DatabaseTable('job', 'id');
 
         $locations = $jobsTable->custom('SELECT DISTINCT location FROM job', [], false);
         $criteria = [];
@@ -61,7 +66,7 @@ class PageController
 
     public function aboutUs(): array
     {
-        $categoriesTable = new databaseTable('category', 'id');
+        $categoriesTable = new DatabaseTable('category', 'id');
         $categories = $categoriesTable->findAll();
 
         return ['template' => '../templates/layout/aboutUs.html.php',
@@ -73,7 +78,7 @@ class PageController
     public function contact(): array
     {
         $errorMessage = [];
-        $categoriesTable = new databaseTable('category', 'id');
+        $categoriesTable = new DatabaseTable('category', 'id');
         $categories = $categoriesTable->findAll();
 
         if (isset($_POST['submit'])) {
@@ -86,7 +91,7 @@ class PageController
                 $errorMessage[] = "EVERY FIELD IS NOT FIELD";
             }
             if (empty($errorMessage)) {
-                $contactTable = new databaseTable('contact', 'id');
+                $contactTable = new DatabaseTable('contact', 'id');
                 $contact = $contactTable->find('email', $email);
 
                 if ($contact) {
@@ -112,10 +117,10 @@ class PageController
 
     public function apply(): array
     {
-        $categoriesTable = new databaseTable('category', 'id');
+        $categoriesTable = new DatabaseTable('category', 'id');
         $categories = $categoriesTable->findAll();
 
-        $jobTable = new databaseTable('job', 'id');
+        $jobTable = new DatabaseTable('job', 'id');
         $job = $jobTable->find('id', $_GET['id']);
 
         if (isset($_POST['submit'])) {
@@ -132,7 +137,7 @@ class PageController
                     'jobId' => $_POST['jobId'],
                     'cv' => $fileName
                 ];
-                $applicantsTable = new databaseTable('applicants', 'id');
+                $applicantsTable = new DatabaseTable('applicants', 'id');
                 $apply = $applicantsTable->save($criteria);
 
                 echo 'Your application is complete. We will contact you after the closing date.';
@@ -157,5 +162,3 @@ class PageController
         header("Location: ../home");
     }
 }
-
-?>
