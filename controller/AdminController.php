@@ -1,18 +1,27 @@
 <?php
-
 namespace controller;
 
 use Database\DatabaseTable;
 
 class AdminController
 {
+
+    private $get;
+
+    private $post;
+
+    public function __construct(array $get, array $post) {
+        $this->get = $get;
+        $this->post = $post;
+    }
+
     public function adminLogin(): array
     {
         $errMsgArray = [];
         $errorFlag = false;
-        if (isset($_POST['submit'])) {
-            $userName = $_POST['username'];
-            $password = $_POST['password'];
+        if (isset($this->post['submit'])) {
+            $userName = $this->post['username'];
+            $password = $this->post['password'];
 
             if ($userName == '' || $password == '') {
                 $errMsgArray[] = 'YOU MUST ENTER A VALID CREDENTIAL';
@@ -69,9 +78,9 @@ class AdminController
 
             $criteria = [];
 
-            if (isset($_GET['id'])) {
+            if (isset($this->get['id'])) {
                 $stmt .= ' WHERE j.categoryId = :id';
-                $criteria = ['id' => $_GET['id']];
+                $criteria = ['id' => $this->get['id']];
             }
 
             $jobs = $jobsTable->custom($stmt, $criteria, false);
@@ -88,11 +97,11 @@ class AdminController
         adminValidation();
         $errorMessageArray = [];
         if (isset($_SESSION['loggedin']) && $_SESSION['loggedin']) {
-            if (isset($_POST['submit'])) {
-                $fullName = $_POST['fullName'];
-                $password = $_POST['password'];
-                $userName = $_POST['username'];
-                $userType = $_POST['userType'];
+            if (isset($this->post['submit'])) {
+                $fullName = $this->post['fullName'];
+                $password = $this->post['password'];
+                $userName = $this->post['username'];
+                $userType = $this->post['userType'];
 
                 $newAdminPassHash = password_hash($password, PASSWORD_DEFAULT);
 
@@ -148,15 +157,15 @@ class AdminController
             $categoriesTable = new DatabaseTable('category', 'id');
             $categories = $categoriesTable->findAll();
 
-            if (isset($_POST['submit'])) {
+            if (isset($this->post['submit'])) {
                 $jobsTable = new DatabaseTable('job', 'id');
                 $criteria = [
-                    'title' => $_POST['title'],
-                    'description' => $_POST['description'],
-                    'salary' => $_POST['salary'],
-                    'location' => $_POST['location'],
-                    'categoryId' => $_POST['categoryId'],
-                    'closingDate' => $_POST['closingDate'],
+                    'title' => $this->post['title'],
+                    'description' => $this->post['description'],
+                    'salary' => $this->post['salary'],
+                    'location' => $this->post['location'],
+                    'categoryId' => $this->post['categoryId'],
+                    'closingDate' => $this->post['closingDate'],
                 ];
                 $jobs = $jobsTable->save($criteria);
                 echo 'Job Added';
@@ -173,22 +182,22 @@ class AdminController
     {
         if (isset($_SESSION['loggedin']) && $_SESSION['loggedin']) {
             $jobsTable = new DatabaseTable('job', 'id');
-            if (isset($_POST['submit'])) {
+            if (isset($this->post['submit'])) {
                 $criteria = [
-                    'title' => $_POST['title'],
-                    'description' => $_POST['description'],
-                    'salary' => $_POST['salary'],
-                    'location' => $_POST['location'],
-                    'categoryId' => $_POST['categoryId'],
-                    'closingDate' => $_POST['closingDate'],
-                    'id' => $_POST['id']
+                    'title' => $this->post['title'],
+                    'description' => $this->post['description'],
+                    'salary' => $this->post['salary'],
+                    'location' => $this->post['location'],
+                    'categoryId' => $this->post['categoryId'],
+                    'closingDate' => $this->post['closingDate'],
+                    'id' => $this->post['id']
                 ];
 
                 $updateJob = $jobsTable->update($criteria);
                 echo 'Job saved';
             }
 
-            $job = $jobsTable->find('id', $_GET['id']);
+            $job = $jobsTable->find('id', $this->get['id']);
 
             $categoriesTable = new DatabaseTable('category', 'id');
             $stmt = $categoriesTable->findAll();
@@ -207,10 +216,10 @@ class AdminController
     {
         adminValidation();
         if (isset($_SESSION['loggedin']) && $_SESSION['loggedin']) {
-            if (isset($_POST['submit'])) {
+            if (isset($this->post['submit'])) {
                 $categoriesTable = new DatabaseTable('category', 'id');
                 $criteria = [
-                    'name' => $_POST['name']
+                    'name' => $this->post['name']
                 ];
                 $category = $categoriesTable->save($criteria);
 
@@ -228,8 +237,8 @@ class AdminController
     {
         if (isset($_SESSION['loggedin']) && $_SESSION['loggedin']) {
             $jobsTable = new DatabaseTable('job', 'id');
-            $r = ($_POST['archive'] == 1) ? "1" : "0";
-            $archiveJob = $jobsTable->update(['archive' => $r, 'id' => $_POST['id']]);
+            $r = ($this->post['archive'] == 1) ? "1" : "0";
+            $archiveJob = $jobsTable->update(['archive' => $r, 'id' => $this->post['id']]);
             if ($_SESSION['userDetails']['userType'] == 'client') {
                 header("Location: clientJobs");
             } else {
@@ -257,7 +266,7 @@ class AdminController
         adminValidation();
         if (isset($_SESSION['loggedin']) && $_SESSION['loggedin']) {
             $categoryTable = new DatabaseTable('category', 'id');
-            $deleteCategory = $categoryTable->custom('DELETE FROM category WHERE id = :id', ['id' => $_POST['id']], true);
+            $deleteCategory = $categoryTable->custom('DELETE FROM category WHERE id = :id', ['id' => $this->post['id']], true);
 
             header('location: categories');
         }
@@ -267,10 +276,10 @@ class AdminController
     {
         if (isset($_SESSION['loggedin']) && $_SESSION['loggedin']) {
             $jobsTable = new DatabaseTable('job', 'id');
-            $job = $jobsTable->find('id', $_GET['id']);
+            $job = $jobsTable->find('id', $this->get['id']);
 
             $stmt = 'SELECT * FROM applicants WHERE jobId = :id';
-            $applicants = $jobsTable->custom($stmt, ['id' => $_GET['id']], false);
+            $applicants = $jobsTable->custom($stmt, ['id' => $this->get['id']], false);
 
             $template = ($_SESSION['userDetails']['userType'] == 'admin') ? '../templates/admin/applicants.html.php' : '../templates/client/clientsApplicants.html.php';
             $title = ($_SESSION['userDetails']['userType'] == 'admin') ? 'Jo\'s Jobs - Applicants' : 'Jo\'s Jobs - Client Applicants';
@@ -289,11 +298,11 @@ class AdminController
         adminValidation();
         if (isset($_SESSION['loggedin']) && $_SESSION['loggedin']) {
             $contactTable = new DatabaseTable('contact', 'id');
-            if ($_POST) {
-                if (isset($_POST['responded']) && $_POST['responded'] == 'on') {
-                    $updateResponse = ['id' => $_POST['id'], 'userId' => $_SESSION['userDetails']['userId']];
+            if ($this->post) {
+                if (isset($this->post['responded']) && $this->post['responded'] == 'on') {
+                    $updateResponse = ['id' => $this->post['id'], 'userId' => $_SESSION['userDetails']['userId']];
                 } else {
-                    $updateResponse = ['id' => $_POST['id'], 'userId' => NULL];
+                    $updateResponse = ['id' => $this->post['id'], 'userId' => NULL];
                 }
                 $contactTable->update($updateResponse);
             }
@@ -346,13 +355,13 @@ class AdminController
             }
 
 
-            if (isset($_GET['id'])) {
+            if (isset($this->get['id'])) {
                 if ($_SESSION['userDetails']['userType'] == 'client') {
                     $stmt .= ' AND j.categoryId = :id ';
                 } else {
                     $stmt .= ' WHERE j.categoryId = :id ';
                 }
-                $criteria['id'] = $_GET['id'];
+                $criteria['id'] = $this->get['id'];
             }
 
             $jobs = $jobsTable->custom($stmt, $criteria, false);
@@ -370,15 +379,15 @@ class AdminController
             $categoriesTable = new DatabaseTable('category', 'id');
             $categories = $categoriesTable->findAll();
 
-            if (isset($_POST['submit'])) {
+            if (isset($this->post['submit'])) {
                 $jobsTable = new DatabaseTable('job', 'id');
                 $criteria = [
-                    'title' => $_POST['title'],
-                    'description' => $_POST['description'],
-                    'salary' => $_POST['salary'],
-                    'location' => $_POST['location'],
-                    'categoryId' => $_POST['categoryId'],
-                    'closingDate' => $_POST['closingDate'],
+                    'title' => $this->post['title'],
+                    'description' => $this->post['description'],
+                    'salary' => $this->post['salary'],
+                    'location' => $this->post['location'],
+                    'categoryId' => $this->post['categoryId'],
+                    'closingDate' => $this->post['closingDate'],
                     'userId' => $_SESSION['userDetails']['userId']
                 ];
                 $jobs = $jobsTable->save($criteria);
@@ -397,13 +406,13 @@ class AdminController
         adminValidation();
         if (isset($_SESSION['loggedin']) && $_SESSION['loggedin']) {
             $categoriesTable = new DatabaseTable('category', 'id');
-            $currentCategory = $categoriesTable->find('id', $_GET['id']);
+            $currentCategory = $categoriesTable->find('id', $this->get['id']);
 
-            if (isset($_POST['submit'])) {
+            if (isset($this->post['submit'])) {
                 $updateCategory = $categoriesTable->update(
                     [
-                        'name' => $_POST['name'],
-                        'id' => $_POST['id']
+                        'name' => $this->post['name'],
+                        'id' => $this->post['id']
                     ]);
                 echo 'Category Saved';
             }

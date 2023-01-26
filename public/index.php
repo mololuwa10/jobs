@@ -8,7 +8,7 @@ require '../functions/loadTemplate.php';
 require '../autoload.php';
 
 $jobsTable = new DatabaseTable('job', 'id');
-$pageController = new PageController();
+$pageController = new PageController($_GET, $_POST);
 
 if ($_SERVER['REQUEST_URI'] !== '/') {
     $functionName = ltrim(explode('?', $_SERVER['REQUEST_URI'])[0], '/');
@@ -16,7 +16,7 @@ if ($_SERVER['REQUEST_URI'] !== '/') {
         $r = explode('/', $functionName);
         $controller = ucfirst($r[0]) . 'Controller';
         $loadController = 'controller\\' . $controller;
-        $pageController = new $loadController();
+        $pageController = new $loadController($_GET, $_POST);
         $functionName = $r[1] ?? 'home';
     }
     $page = $pageController->$functionName();

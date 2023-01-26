@@ -1,7 +1,5 @@
 <?php
-
 namespace Database;
-
 use PDO;
 use PDOException;
 
@@ -17,7 +15,7 @@ class DatabaseTable
         $this->primaryKey = $primaryKey;
     }
 
-    public function customFind($where, $criteria): false|array
+    public function customFind($where, $criteria)
     {
         $stmt = 'SELECT * FROM ' . $this->table;
         if ($where != "") {
@@ -29,7 +27,7 @@ class DatabaseTable
         return $stmt->fetchAll();
     }
 
-    public function findAll(): false|array
+    public function findAll()
     {
         $stmt = $this->pdo->prepare("SELECT * FROM " . $this->table);
         $stmt->execute();

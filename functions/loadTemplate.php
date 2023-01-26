@@ -1,5 +1,5 @@
 <?php
-function loadTemplate($fileName, $templateVars): false|string
+function loadTemplate($fileName, $templateVars)
 {
     extract($templateVars);
     ob_start();

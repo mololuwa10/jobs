@@ -7,6 +7,14 @@ use DateTime;
 
 class PageController
 {
+    private $get;
+
+    private $post;
+
+    public function __construct(array $get, array $post) {
+        $this->get = $get;
+        $this->post = $post;
+    }
     public function faqs(): array
     {
         return ['template' => '../templates/layout/faqs.html.php',
@@ -25,12 +33,12 @@ class PageController
 
         $criteria = [
             'date' => $date->format('Y-m-d'),
-            'id' => $_GET['id']
+            'id' => $this->get['id']
         ];
 
         $jobs = $jobsTable->customFind('categoryId = :id AND closingDate > :date', $criteria);
 
-        $currentCategory = $categoriesTable->find('id', $_GET['id']);
+        $currentCategory = $categoriesTable->find('id', $this->get['id']);
 
         return ['template' => '../templates/layout/category.html.php',
             'variables' => ['jobs' => $jobs, 'categories' => $categories, 'currentCategory' => $currentCategory],
@@ -50,9 +58,9 @@ class PageController
         LEFT JOIN category c ON c.id = j.categoryId
         WHERE (j.archive = 0 OR j.archive IS NULL)';
 
-        if (isset($_GET["location"])) {
+        if (isset($this->get["location"])) {
             $stmt .= ' AND j.location = :location';
-            $criteria = ["location" => $_GET["location"]];
+            $criteria = ["location" => $this->get["location"]];
         }
 
         $stmt .= ' ORDER BY j.closingDate ASC LIMIT 10';
@@ -81,11 +89,11 @@ class PageController
         $categoriesTable = new DatabaseTable('category', 'id');
         $categories = $categoriesTable->findAll();
 
-        if (isset($_POST['submit'])) {
-            $fullName = $_POST['fullName'];
-            $email = $_POST['email'];
-            $phoneNumber = $_POST['phoneNumber'];
-            $enquiry = $_POST['enquiry'];
+        if (isset($this->post['submit'])) {
+            $fullName = $this->post['fullName'];
+            $email = $this->post['email'];
+            $phoneNumber = $this->post['phoneNumber'];
+            $enquiry = $this->post['enquiry'];
 
             if (empty($fullName) || empty($email) || empty($phoneNumber) || empty($enquiry)) {
                 $errorMessage[] = "EVERY FIELD IS NOT FIELD";
@@ -121,9 +129,9 @@ class PageController
         $categories = $categoriesTable->findAll();
 
         $jobTable = new DatabaseTable('job', 'id');
-        $job = $jobTable->find('id', $_GET['id']);
+        $job = $jobTable->find('id', $this->get['id']);
 
-        if (isset($_POST['submit'])) {
+        if (isset($this->post['submit'])) {
             if ($_FILES['cv']['error'] == 0) {
                 $parts = explode('.', $_FILES['cv']['name']);
                 $extension = end($parts);
@@ -131,10 +139,10 @@ class PageController
                 move_uploaded_file($_FILES['cv']['tmp_name'], 'cvs/' . $fileName);
 
                 $criteria = [
-                    'name' => $_POST['name'],
-                    'email' => $_POST['email'],
-                    'details' => $_POST['details'],
-                    'jobId' => $_POST['jobId'],
+                    'name' => $this->post['name'],
+                    'email' => $this->post['email'],
+                    'details' => $this->post['details'],
+                    'jobId' => $this->post['jobId'],
                     'cv' => $fileName
                 ];
                 $applicantsTable = new DatabaseTable('applicants', 'id');
