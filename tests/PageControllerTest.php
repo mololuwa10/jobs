@@ -28,10 +28,10 @@ class PageControllerTest extends \PHPUnit\Framework\TestCase
     protected function setUp(): void
     {
         $this->pdo = new \PDO('mysql:dbname=testJob;host=mysql', 'student', 'student');
-        $this->categoriesTable = new DatabaseTable('testCategory', 'id');
-        $this->jobsTable = new DatabaseTable('testJob', 'id');
-        $this->contactTable = new DatabaseTable('testContact', 'id');
-        $this->applicantTable = new DatabaseTable('testApplicants', 'id');
+        $this->categoriesTable = new DatabaseTable('testCategory', 'id', 'testJob');
+        $this->jobsTable = new DatabaseTable('testJob', 'id', 'testJob');
+        $this->contactTable = new DatabaseTable('testContact', 'id', 'testJob');
+        $this->applicantTable = new DatabaseTable('testApplicants', 'id', 'testJob');
         $this->date = new DateTime();
     }
 }

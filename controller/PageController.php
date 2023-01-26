@@ -10,10 +10,13 @@ class PageController
     private $get;
 
     private $post;
+    private mixed $dbName;
 
-    public function __construct(array $get, array $post) {
+
+    public function __construct(array $get, array $post, $dbName = 'job') {
         $this->get = $get;
         $this->post = $post;
+        $this->dbName = $dbName;
     }
     public function faqs(): array
     {
@@ -25,10 +28,10 @@ class PageController
 
     public function categories(): array
     {
-        $categoriesTable = new DatabaseTable('category', 'id');
+        $categoriesTable = new DatabaseTable('category', 'id', $this->dbName);
         $categories = $categoriesTable->findAll();
 
-        $jobsTable = new DatabaseTable('job', 'id');
+        $jobsTable = new DatabaseTable('job', 'id', $this->dbName);
         $date = new DateTime();
 
         $criteria = [
@@ -48,7 +51,7 @@ class PageController
 
     public function home(): array
     {
-        $jobsTable = new DatabaseTable('job', 'id');
+        $jobsTable = new DatabaseTable('job', 'id', $this->dbName);
 
         $locations = $jobsTable->custom('SELECT DISTINCT location FROM job', [], false);
         $criteria = [];
@@ -74,7 +77,7 @@ class PageController
 
     public function aboutUs(): array
     {
-        $categoriesTable = new DatabaseTable('category', 'id');
+        $categoriesTable = new DatabaseTable('category', 'id', $this->dbName);
         $categories = $categoriesTable->findAll();
 
         return ['template' => '../templates/layout/aboutUs.html.php',
@@ -86,7 +89,7 @@ class PageController
     public function contact(): array
     {
         $errorMessage = [];
-        $categoriesTable = new DatabaseTable('category', 'id');
+        $categoriesTable = new DatabaseTable('category', 'id', $this->dbName);
         $categories = $categoriesTable->findAll();
 
         if (isset($this->post['submit'])) {
@@ -99,7 +102,7 @@ class PageController
                 $errorMessage[] = "EVERY FIELD IS NOT FIELD";
             }
             if (empty($errorMessage)) {
-                $contactTable = new DatabaseTable('contact', 'id');
+                $contactTable = new DatabaseTable('contact', 'id', $this->dbName);
                 $contact = $contactTable->find('email', $email);
 
                 if ($contact) {
@@ -125,10 +128,10 @@ class PageController
 
     public function apply(): array
     {
-        $categoriesTable = new DatabaseTable('category', 'id');
+        $categoriesTable = new DatabaseTable('category', 'id', $this->dbName);
         $categories = $categoriesTable->findAll();
 
-        $jobTable = new DatabaseTable('job', 'id');
+        $jobTable = new DatabaseTable('job', 'id', $this->dbName);
         $job = $jobTable->find('id', $this->get['id']);
 
         if (isset($this->post['submit'])) {
@@ -145,7 +148,7 @@ class PageController
                     'jobId' => $this->post['jobId'],
                     'cv' => $fileName
                 ];
-                $applicantsTable = new DatabaseTable('applicants', 'id');
+                $applicantsTable = new DatabaseTable('applicants', 'id', $this->dbName);
                 $apply = $applicantsTable->save($criteria);
 
                 echo 'Your application is complete. We will contact you after the closing date.';

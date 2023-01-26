@@ -9,10 +9,15 @@ class AdminController
     private $get;
 
     private $post;
+    /**
+     * @var mixed|string
+     */
+    private $dbName;
 
-    public function __construct(array $get, array $post) {
+    public function __construct(array $get, array $post, $dbName = 'job') {
         $this->get = $get;
         $this->post = $post;
+        $this->dbName = $dbName;
     }
 
     public function adminLogin(): array
@@ -28,7 +33,7 @@ class AdminController
                 $errorFlag = true;
             }
 
-            $userAdminTable = new DatabaseTable('user', 'userId');
+            $userAdminTable = new DatabaseTable('user', 'userId', $this->dbName);
             $user = $userAdminTable->find('userName', $userName);
 
             if ($user) {
@@ -68,9 +73,9 @@ class AdminController
     {
         adminValidation();
         if (isset($_SESSION['loggedin']) && $_SESSION['loggedin']) {
-            $jobsTable = new DatabaseTable('job', 'id');
+            $jobsTable = new DatabaseTable('job', 'id', $this->dbName);
 
-            $categoryTable = new DatabaseTable('category', 'id');
+            $categoryTable = new DatabaseTable('category', 'id', $this->dbName);
             $category = $categoryTable->findAll();
 
             $stmt = 'SELECT j.id, j.title, j.description, j.salary, j.categoryId, j.archive, (SELECT count(*) FROM applicants WHERE jobId = j.id) as count, c.id as catId, c.name
@@ -116,7 +121,7 @@ class AdminController
                 }
 
                 if (empty($errorMessageArray)) {
-                    $userAdminTable = new DatabaseTable('user', 'userId');
+                    $userAdminTable = new DatabaseTable('user', 'userId', $this->dbName);
                     $user = $userAdminTable->find('userName', $userName);
 
                     if ($user) {
@@ -154,11 +159,11 @@ class AdminController
     {
         adminValidation();
         if (isset($_SESSION['loggedin']) && $_SESSION['loggedin']) {
-            $categoriesTable = new DatabaseTable('category', 'id');
+            $categoriesTable = new DatabaseTable('category', 'id', $this->dbName);
             $categories = $categoriesTable->findAll();
 
             if (isset($this->post['submit'])) {
-                $jobsTable = new DatabaseTable('job', 'id');
+                $jobsTable = new DatabaseTable('job', 'id', $this->dbName);
                 $criteria = [
                     'title' => $this->post['title'],
                     'description' => $this->post['description'],
@@ -181,7 +186,7 @@ class AdminController
     public function editJob(): array
     {
         if (isset($_SESSION['loggedin']) && $_SESSION['loggedin']) {
-            $jobsTable = new DatabaseTable('job', 'id');
+            $jobsTable = new DatabaseTable('job', 'id', $this->dbName);
             if (isset($this->post['submit'])) {
                 $criteria = [
                     'title' => $this->post['title'],
@@ -199,7 +204,7 @@ class AdminController
 
             $job = $jobsTable->find('id', $this->get['id']);
 
-            $categoriesTable = new DatabaseTable('category', 'id');
+            $categoriesTable = new DatabaseTable('category', 'id', $this->dbName);
             $stmt = $categoriesTable->findAll();
 
             $template = ($_SESSION['userDetails']['userType'] == 'admin') ? '../templates/admin/editJob.html.php' : '../templates/client/clientEditJob.html.php';
@@ -214,21 +219,20 @@ class AdminController
 
     public function addCategory(): array
     {
-        adminValidation();
-        if (isset($_SESSION['loggedin']) && $_SESSION['loggedin']) {
+//        adminValidation();
+            $message = '';
             if (isset($this->post['submit'])) {
-                $categoriesTable = new DatabaseTable('category', 'id');
+                $categoriesTable = new DatabaseTable('category', 'id', $this->dbName);
                 $criteria = [
                     'name' => $this->post['name']
                 ];
                 $category = $categoriesTable->save($criteria);
-
-                echo 'Category added';
+                $message =  'Category added';
             }
-        }
+
 
         return ['template' => '../templates/admin/addcategory.html.php',
-            'variables' => [],
+            'variables' => ['message' => $message],
             'title' => 'Jo\'s Jobs - Add Category'
         ];
     }
@@ -236,7 +240,7 @@ class AdminController
     public function archiveJob(): void
     {
         if (isset($_SESSION['loggedin']) && $_SESSION['loggedin']) {
-            $jobsTable = new DatabaseTable('job', 'id');
+            $jobsTable = new DatabaseTable('job', 'id', $this->dbName);
             $r = ($this->post['archive'] == 1) ? "1" : "0";
             $archiveJob = $jobsTable->update(['archive' => $r, 'id' => $this->post['id']]);
             if ($_SESSION['userDetails']['userType'] == 'client') {
@@ -251,7 +255,7 @@ class AdminController
     {
         adminValidation();
         if (isset($_SESSION['loggedin']) && $_SESSION['loggedin']) {
-            $categoryTable = new DatabaseTable('category', 'id');
+            $categoryTable = new DatabaseTable('category', 'id', $this->dbName);
             $categories = $categoryTable->findAll();
         }
 
@@ -265,7 +269,7 @@ class AdminController
     {
         adminValidation();
         if (isset($_SESSION['loggedin']) && $_SESSION['loggedin']) {
-            $categoryTable = new DatabaseTable('category', 'id');
+            $categoryTable = new DatabaseTable('category', 'id', $this->dbName);
             $deleteCategory = $categoryTable->custom('DELETE FROM category WHERE id = :id', ['id' => $this->post['id']], true);
 
             header('location: categories');
@@ -275,7 +279,7 @@ class AdminController
     public function applicants(): array
     {
         if (isset($_SESSION['loggedin']) && $_SESSION['loggedin']) {
-            $jobsTable = new DatabaseTable('job', 'id');
+            $jobsTable = new DatabaseTable('job', 'id', $this->dbName);
             $job = $jobsTable->find('id', $this->get['id']);
 
             $stmt = 'SELECT * FROM applicants WHERE jobId = :id';
@@ -297,7 +301,7 @@ class AdminController
     {
         adminValidation();
         if (isset($_SESSION['loggedin']) && $_SESSION['loggedin']) {
-            $contactTable = new DatabaseTable('contact', 'id');
+            $contactTable = new DatabaseTable('contact', 'id', $this->dbName);
             if ($this->post) {
                 if (isset($this->post['responded']) && $this->post['responded'] == 'on') {
                     $updateResponse = ['id' => $this->post['id'], 'userId' => $_SESSION['userDetails']['userId']];
@@ -335,9 +339,9 @@ class AdminController
     public function clientJobs(): array
     {
         if (isset($_SESSION['loggedin']) && $_SESSION['loggedin']) {
-            $jobsTable = new DatabaseTable('job', 'id');
+            $jobsTable = new DatabaseTable('job', 'id', $this->dbName);
 
-            $categoryTable = new DatabaseTable('category', 'id');
+            $categoryTable = new DatabaseTable('category', 'id', $this->dbName);
             $category = $categoryTable->findAll();
 
             $stmt = 'SELECT j.id, j.title, j.description, j.salary, j.categoryId, j.archive, j.userId, (SELECT count(*) FROM applicants WHERE jobId = j.id) as count, c.id as catId, u.userId as userId, u.userType, c.name
@@ -376,11 +380,11 @@ class AdminController
     public function clientAddJob(): array
     {
         if (isset($_SESSION['loggedin']) && $_SESSION['loggedin']) {
-            $categoriesTable = new DatabaseTable('category', 'id');
+            $categoriesTable = new DatabaseTable('category', 'id', $this->dbName);
             $categories = $categoriesTable->findAll();
 
             if (isset($this->post['submit'])) {
-                $jobsTable = new DatabaseTable('job', 'id');
+                $jobsTable = new DatabaseTable('job', 'id', $this->dbName);
                 $criteria = [
                     'title' => $this->post['title'],
                     'description' => $this->post['description'],
@@ -405,7 +409,7 @@ class AdminController
     {
         adminValidation();
         if (isset($_SESSION['loggedin']) && $_SESSION['loggedin']) {
-            $categoriesTable = new DatabaseTable('category', 'id');
+            $categoriesTable = new DatabaseTable('category', 'id', $this->dbName);
             $currentCategory = $categoriesTable->find('id', $this->get['id']);
 
             if (isset($this->post['submit'])) {

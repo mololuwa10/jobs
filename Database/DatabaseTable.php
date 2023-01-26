@@ -8,9 +8,10 @@ class DatabaseTable
     private $table;
     private $primaryKey;
 
-    public function __construct($table, $primaryKey)
+    private $dbName;
+    public function __construct($table, $primaryKey, $dbName = 'job')
     {
-        $this->pdo = new PDO('mysql:dbname=job;host=mysql', 'student', 'student');
+        $this->pdo = new PDO('mysql:dbname='.$dbName.';host=mysql', 'student', 'student');
         $this->table = $table;
         $this->primaryKey = $primaryKey;
     }

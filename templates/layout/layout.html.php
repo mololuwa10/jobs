@@ -44,7 +44,7 @@ if (isset($_SESSION['loggedin']) && $_SESSION['password_verified'] && $_SESSION[
         <li>Jobs
             <ul>
                 <?php
-                $categoryTable = new DatabaseTable('category', 'id');
+                $categoryTable = new DatabaseTable('category', 'id', 'job');
                 $categories = $categoryTable->findAll();
                 foreach ($categories as $category) {
                     echo '<li><a href="../categories?id=' . $category['id'] . '">' . $category['name'] . '</a></li>';
