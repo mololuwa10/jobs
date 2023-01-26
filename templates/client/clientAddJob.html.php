@@ -4,7 +4,7 @@
 
         <h2>Add Job</h2>
 
-        <form action="clientAddJob" method="POST">
+        <form action="addJob" method="POST">
             <label>Title</label>
             <input type=" text" name="title"/>
 

@@ -4,5 +4,6 @@
         <li><a href="categories">Categories</a></li>
         <li><a href="addUser">Add User</a></li>
         <li><a href="manageEnquiry">Manage Enquiries</a></li>
+        <li><a href="manageUser">Manage User</a></li>
     </ul>
 </section>

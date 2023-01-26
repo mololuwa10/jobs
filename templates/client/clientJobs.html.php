@@ -4,7 +4,7 @@
 
         <h2>Jobs</h2>
 
-        <a class="new" href="clientAddJob">Add new job</a>
+        <a class="new" href="addJob">Add new job</a>
         <div>
             <form action="clientJobs" class="job-filter" method="get">
                 <select name="id">

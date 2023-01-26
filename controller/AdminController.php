@@ -145,6 +145,31 @@ class AdminController
         ];
     }
 
+    public function manageUser(): array
+    {
+        adminValidation();
+        $userTable = new DatabaseTable('user', 'userId', $this->dbName);
+        $users = $userTable->findAll();
+
+        return ['template' => '../templates/admin/manageUser.html.php',
+            'variables' => ['users' => $users],
+            'title' => 'Jo\'s Jobs - Manage User'];
+    }
+
+    public function deleteUser(): void
+    {
+        if (isset($_SESSION['loggedin']) && $_SESSION['loggedin']) {
+            $userTable = new DatabaseTable('user', 'userId', $this->dbName);
+            $user = $userTable->custom('DELETE FROM user WHERE userId = :userId', ['userId' => $this->post['userId']], true);
+            if ($user) {
+                header("Location: manageUser");
+            }
+        } else {
+            echo "Error: You are not logged in.";
+        }
+
+    }
+
     public function logOut(): void
     {
         if (!isset($_SESSION)) {
@@ -157,7 +182,6 @@ class AdminController
 
     public function addJob(): array
     {
-        adminValidation();
         if (isset($_SESSION['loggedin']) && $_SESSION['loggedin']) {
             $categoriesTable = new DatabaseTable('category', 'id', $this->dbName);
             $categories = $categoriesTable->findAll();
@@ -171,15 +195,19 @@ class AdminController
                     'location' => $this->post['location'],
                     'categoryId' => $this->post['categoryId'],
                     'closingDate' => $this->post['closingDate'],
+                    'userId' => $_SESSION['userDetails']['userId']
                 ];
                 $jobs = $jobsTable->save($criteria);
                 echo 'Job Added';
             }
         }
 
-        return ['template' => '../templates/admin/addjob.html.php',
+        $template = ($_SESSION['userDetails']['userType'] == 'admin') ? '../templates/admin/addjob.html.php' : '../templates/client/clientAddJob.html.php';
+        $title = ($_SESSION['userDetails']['userType'] == 'admin') ? 'Jo\'s Jobs - Admin Add Jobs' : 'Jo\'s Jobs - Client Add Jobs';
+
+        return ['template' => $template,
             'variables' => ['categories' => $categories],
-            'title' => 'Jo\'s Jobs - Add Job'
+            'title' => $title
         ];
     }
 
@@ -195,7 +223,7 @@ class AdminController
                     'location' => $this->post['location'],
                     'categoryId' => $this->post['categoryId'],
                     'closingDate' => $this->post['closingDate'],
-                    'id' => $this->post['id']
+                    'id' => $this->post['id'],
                 ];
 
                 $updateJob = $jobsTable->update($criteria);
@@ -325,7 +353,7 @@ class AdminController
         ];
     }
 
-    public function clientIndex(): array
+    public function clientIndex()
     {
         if (isset($_SESSION['loggedin']) && $_SESSION['loggedin']) {
             return ['template' => '../templates/client/clientIndex.html.php',
@@ -333,7 +361,6 @@ class AdminController
                 'title' => 'Jo\'s Jobs - Client Home'
             ];
         }
-
     }
 
     public function clientJobs(): array
@@ -377,33 +404,33 @@ class AdminController
         ];
     }
 
-    public function clientAddJob(): array
-    {
-        if (isset($_SESSION['loggedin']) && $_SESSION['loggedin']) {
-            $categoriesTable = new DatabaseTable('category', 'id', $this->dbName);
-            $categories = $categoriesTable->findAll();
-
-            if (isset($this->post['submit'])) {
-                $jobsTable = new DatabaseTable('job', 'id', $this->dbName);
-                $criteria = [
-                    'title' => $this->post['title'],
-                    'description' => $this->post['description'],
-                    'salary' => $this->post['salary'],
-                    'location' => $this->post['location'],
-                    'categoryId' => $this->post['categoryId'],
-                    'closingDate' => $this->post['closingDate'],
-                    'userId' => $_SESSION['userDetails']['userId']
-                ];
-                $jobs = $jobsTable->save($criteria);
-                echo 'Job Added';
-            }
-        }
-
-        return ['template' => '../templates/client/clientAddJob.html.php',
-            'variables' => ['categories' => $categories],
-            'title' => 'Jo\'s Jobs - Client Home'
-        ];
-    }
+//    public function clientAddJob(): array
+//    {
+//        if (isset($_SESSION['loggedin']) && $_SESSION['loggedin']) {
+//            $categoriesTable = new DatabaseTable('category', 'id', $this->dbName);
+//            $categories = $categoriesTable->findAll();
+//
+//            if (isset($this->post['submit'])) {
+//                $jobsTable = new DatabaseTable('job', 'id', $this->dbName);
+//                $criteria = [
+//                    'title' => $this->post['title'],
+//                    'description' => $this->post['description'],
+//                    'salary' => $this->post['salary'],
+//                    'location' => $this->post['location'],
+//                    'categoryId' => $this->post['categoryId'],
+//                    'closingDate' => $this->post['closingDate'],
+//                    'userId' => $_SESSION['userDetails']['userId']
+//                ];
+//                $jobs = $jobsTable->save($criteria);
+//                echo 'Job Added';
+//            }
+//        }
+//
+//        return ['template' => '../templates/client/clientAddJob.html.php',
+//            'variables' => ['categories' => $categories],
+//            'title' => 'Jo\'s Jobs - Client Add Job'
+//        ];
+//    }
 
     public function editCategory(): array
     {

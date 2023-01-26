@@ -44,7 +44,6 @@
         echo '</thead>';
         echo '</table>';
         ?>
-
     </section>
 </main>
 
