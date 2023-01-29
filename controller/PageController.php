@@ -10,7 +10,7 @@ class PageController
     private $get;
 
     private $post;
-    private mixed $dbName;
+    private $dbName;
 
 
     public function __construct(array $get, array $post, $dbName = 'job') {
@@ -61,7 +61,7 @@ class PageController
         LEFT JOIN category c ON c.id = j.categoryId
         WHERE (j.archive = 0 OR j.archive IS NULL)';
 
-        if (isset($this->get["location"])) {
+        if (isset($this->get["location"]) && $this->get["location"] != 'All') {
             $stmt .= ' AND j.location = :location';
             $criteria = ["location" => $this->get["location"]];
         }
@@ -69,8 +69,12 @@ class PageController
         $stmt .= ' ORDER BY j.closingDate ASC LIMIT 10';
         $jobs = $jobsTable->custom($stmt, $criteria, false);
 
-        return ['template' => '../templates/layout/index.html.php',
-            'variables' => ['jobs' => $jobs, 'locations' => $locations],
+        return [
+            'template' => '../templates/layout/index.html.php',
+            'variables' => [
+                'jobs' => $jobs,
+                'locations' => $locations
+            ],
             'title' => 'Jo\'s Jobs - Home'
         ];
     }

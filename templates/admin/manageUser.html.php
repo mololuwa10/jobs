@@ -11,10 +11,8 @@
         echo '<th class="category" style="width: 20%">Username</th>';
         echo '<th class="category" style="width: 20%">User Type</th>';
         echo '<th class="category" style="width: 20%">Delete</th>';
-//        echo '<th style="width: 5%">&nbsp;</th>';
         echo '<th style="width: 15%">&nbsp;</th>';
         echo '<th style="width: 5%">&nbsp;</th>';
-//        echo '<th style="width: 5%">&nbsp;</th>';
         echo '</tr>';
 
         foreach ($users as $user) {

@@ -8,6 +8,7 @@ class DatabaseTable
     private $table;
     private $primaryKey;
 
+    private $pdo;
     private $dbName;
     public function __construct($table, $primaryKey, $dbName = 'job')
     {
@@ -97,6 +98,15 @@ class DatabaseTable
             }
         } catch (PDOException $e) {
             echo $e;
+        }
+    }
+
+    public function truncateTable() {
+        $tableName = ['user', 'category', 'contact', 'job'];
+
+        foreach ($tableName as $table) {
+            $table = new DatabaseTable($tableName, 'id', $this->dbName);
+            $table->custom('TRUNCATE TABLE ' . $tableName);
         }
     }
 }

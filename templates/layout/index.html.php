@@ -5,6 +5,8 @@
     <div class="location-filter">
         <form action="home" class="job-filter" method="get">
             <select name="location">
+                <option disabled selected>Filter By Location: </option>
+                <option value="All">All Locations</option>
                 <?php
                 foreach ($locations as $location) {
                     echo '<option value=' . $location['location'] . '>' . 'Filter By Location: ' . $location['location'] . '</option>';

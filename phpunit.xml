@@ -5,4 +5,11 @@
             <directory>tests</directory>
         </testsuite>
     </testsuites>
+
+    <filter>
+        <whitelist>
+            <directory suffix=".php">controller</directory>
+            <directory suffix=".php">Database</directory>
+        </whitelist>
+    </filter>
 </phpunit>

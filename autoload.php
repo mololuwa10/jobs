@@ -1,5 +1,4 @@
 <?php
-
 function autoload($className): void
 {
     $file = __DIR__ . DIRECTORY_SEPARATOR . str_replace('\\', DIRECTORY_SEPARATOR, $className) . '.php';
