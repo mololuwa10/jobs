@@ -93,11 +93,12 @@ class PageController
     public function contact(): array
     {
         $errorMessage = [];
+        $validationMessage = '';
         $categoriesTable = new DatabaseTable('category', 'id', $this->dbName);
         $categories = $categoriesTable->findAll();
 
         if (isset($this->post['submit'])) {
-            $fullName = $this->post['fullName'];
+            $fullName = $this->post['fullname'];
             $email = $this->post['email'];
             $phoneNumber = $this->post['phoneNumber'];
             $enquiry = $this->post['enquiry'];
@@ -110,7 +111,7 @@ class PageController
                 $contact = $contactTable->find('email', $email);
 
                 if ($contact) {
-                    $errorMessageArray[] = "CREDENTIALS ALREADY EXIST";
+                    $errorMessage[] = "CREDENTIALS ALREADY EXIST";
                 } else {
                     $criteria = [
                         'fullname' => $fullName,
@@ -119,19 +120,20 @@ class PageController
                         'phoneNumber' => $phoneNumber
                     ];
                     $addEnquiry = $contactTable->insert($criteria);
-                    echo 'ENQUIRY RECEIVED';
+                    $validationMessage = 'ENQUIRY RECEIVED';
                 }
             }
         }
 
         return ['template' => '../templates/layout/contact.html.php',
-            'variables' => ['categories' => $categories],
+            'variables' => ['categories' => $categories, 'errorMessage' => $errorMessage, 'validationMessage' => $validationMessage],
             'title' => 'Jo\'s Jobs - Contact Us'
         ];
     }
 
     public function apply(): array
     {
+        $errorMessage = [];
         $categoriesTable = new DatabaseTable('category', 'id', $this->dbName);
         $categories = $categoriesTable->findAll();
 
@@ -155,25 +157,25 @@ class PageController
                 $applicantsTable = new DatabaseTable('applicants', 'id', $this->dbName);
                 $apply = $applicantsTable->save($criteria);
 
-                echo 'Your application is complete. We will contact you after the closing date.';
+                $errorMessage[] = 'Your application is complete. We will contact you after the closing date.';
             } else {
-                echo 'There was an error uploading your CV';
+                $errorMessage[] = 'There was an error uploading your CV';
             }
         }
 
         return ['template' => '../templates/layout/apply.html.php',
-            'variables' => ['job' => $job, 'categories' => $categories],
+            'variables' => ['job' => $job, 'categories' => $categories, 'errorMessage' => $errorMessage],
             'title' => 'Jo\'s Jobs - Apply'
         ];
     }
-
-    public function logOut(): void
-    {
-        if (!isset($_SESSION)) {
-            session_start();
-        }
-        unset($_SESSION);
-        session_destroy();
-        header("Location: ../home");
-    }
+//
+//    public function logOut(): void
+//    {
+//        if (!isset($_SESSION)) {
+//            session_start();
+//        }
+//        unset($_SESSION);
+//        session_destroy();
+//        header("Location: ../home");
+//    }
 }

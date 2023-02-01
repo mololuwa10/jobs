@@ -1,9 +1,9 @@
 <?php
 
 namespace controller;
+
 use Database\AdminValidation;
 use Database\DatabaseTable;
-
 
 class AdminController
 {
@@ -63,9 +63,10 @@ class AdminController
         ];
     }
 
-    public function adminIndex(): array
+    public function adminIndex()
     {
         $this->validation->adminValidation();
+
         return ['template' => '../templates/admin/adminIndex.html.php',
             'variables' => [],
             'title' => 'Jo\'s Jobs - Admin Home'
@@ -81,7 +82,7 @@ class AdminController
         $category = $categoryTable->findAll();
 
         $stmt = 'SELECT j.id, j.title, j.description, j.salary, j.categoryId, j.archive, (SELECT count(*) FROM applicants WHERE jobId = j.id) as count, c.id as catId, c.name
-                 FROM job j LEFT JOIN category c ON c.id = j.categoryId';
+             FROM job j LEFT JOIN category c ON c.id = j.categoryId';
 
         $criteria = [];
 
@@ -103,39 +104,40 @@ class AdminController
         $this->validation->adminValidation();
         $errorMessageArray = [];
         $validationMessage = '';
+        if (isset($_SESSION['loggedin']) && $_SESSION['loggedin']) {
+            if (isset($this->post['submit'])) {
+                $fullName = $this->post['fullName'];
+                $password = $this->post['password'];
+                $userName = $this->post['username'];
+                $userType = $this->post['userType'];
 
-        if (isset($this->post['submit'])) {
-            $fullName = $this->post['fullName'];
-            $password = $this->post['password'];
-            $userName = $this->post['username'];
-            $userType = $this->post['userType'];
+                $newAdminPassHash = password_hash($password, PASSWORD_DEFAULT);
 
-            $newAdminPassHash = password_hash($password, PASSWORD_DEFAULT);
+                if (empty($fullName)) {
+                    $errorMessageArray[] = "FULL NAME FIELD IS EMPTY";
+                }
+                if (empty($password)) {
+                    $errorMessageArray[] = "PASSWORD FIELD IS EMPTY";
+                }
+                if (empty($userName)) {
+                    $errorMessageArray[] = "USERNAME FIELD IS EMPTY";
+                }
 
-            if (empty($fullName)) {
-                $errorMessageArray['fullName'] = "FULL NAME FIELD IS EMPTY";
-            }
-            if (empty($password)) {
-                $errorMessageArray['password'] = "PASSWORD FIELD IS EMPTY";
-            }
-            if (empty($userName)) {
-                $errorMessageArray['userName'] = "USERNAME FIELD IS EMPTY";
-            }
-
-            if (empty($errorMessageArray)) {
-                $userAdminTable = new DatabaseTable('user', 'userId', $this->dbName);
-                $user = $userAdminTable->find('userName', $userName);
-                if ($user) {
-                    $errorMessageArray[] = "CREDENTIALS ALREADY EXIST";
-                } else {
-                    $criteria = [
-                        'fullName' => $fullName,
-                        'password' => $newAdminPassHash,
-                        'userName' => $userName,
-                        'userType' => $userType
-                    ];
-                    $addUser = $userAdminTable->insert($criteria);
-                    $validationMessage = 'USER ADDED!';
+                if (empty($errorMessageArray)) {
+                    $userAdminTable = new DatabaseTable('user', 'userId', $this->dbName);
+                    $user = $userAdminTable->find('userName', $userName);
+                    if ($user) {
+                        $errorMessageArray[] = "CREDENTIALS ALREADY EXIST";
+                    } else {
+                        $criteria = [
+                            'fullName' => $fullName,
+                            'password' => $newAdminPassHash,
+                            'userName' => $userName,
+                            'userType' => $userType
+                        ];
+                        $addUser = $userAdminTable->insert($criteria);
+                        $validationMessage = 'USER ADDED!';
+                    }
                 }
             }
         }
@@ -145,21 +147,23 @@ class AdminController
         ];
     }
 
-    public function manageUser(): array
+    public function manageUser()
     {
         $this->validation->adminValidation();
-        $userTable = new DatabaseTable('user', 'userId', $this->dbName);
-        $users = $userTable->findAll();
-
-        return ['template' => '../templates/admin/manageUser.html.php',
-            'variables' => ['users' => $users],
-            'title' => 'Jo\'s Jobs - Manage User'];
+        if (isset($_SESSION['loggedin']) && $_SESSION['loggedin']) {
+            $userTable = new DatabaseTable('user', 'userId', $this->dbName);
+            $users = $userTable->findAll();
+            return ['template' => '../templates/admin/manageUser.html.php',
+                'variables' => ['users' => $users],
+                'title' => 'Jo\'s Jobs - Manage User'
+            ];
+        }
     }
 
     public function deleteUser(): void
     {
         $userTable = new DatabaseTable('user', 'userId', $this->dbName);
-        $user = $userTable->custom('DELETE FROM user WHERE userId = :userId', ['userId' => $this->post['id']], true);
+        $user = $userTable->delete(['userId' => $this->post['id']]);
         header("Location: manageUser");
         exit();
     }
@@ -176,23 +180,23 @@ class AdminController
 
     public function addJob(): array
     {
-            $categoriesTable = new DatabaseTable('category', 'id', $this->dbName);
-            $categories = $categoriesTable->findAll();
+        $categoriesTable = new DatabaseTable('category', 'id', $this->dbName);
+        $categories = $categoriesTable->findAll();
 
-            if (isset($this->post['submit'])) {
-                $jobsTable = new DatabaseTable('job', 'id', $this->dbName);
-                $criteria = [
-                    'title' => $this->post['title'],
-                    'description' => $this->post['description'],
-                    'salary' => $this->post['salary'],
-                    'location' => $this->post['location'],
-                    'categoryId' => $this->post['categoryId'],
-                    'closingDate' => $this->post['closingDate'],
-                    'userId' => $_SESSION['userDetails']['userId']
-                ];
-                $jobs = $jobsTable->save($criteria);
-                echo 'Job Added';
-            }
+        if (isset($this->post['submit'])) {
+            $jobsTable = new DatabaseTable('job', 'id', $this->dbName);
+            $criteria = [
+                'title' => $this->post['title'],
+                'description' => $this->post['description'],
+                'salary' => $this->post['salary'],
+                'location' => $this->post['location'],
+                'categoryId' => $this->post['categoryId'],
+                'closingDate' => $this->post['closingDate'],
+                'userId' => $_SESSION['userDetails']['userId']
+            ];
+            $jobs = $jobsTable->save($criteria);
+            echo 'Job Added';
+        }
 
         $template = ($_SESSION['userDetails']['userType'] == 'admin') ? '../templates/admin/addjob.html.php' : '../templates/client/clientAddJob.html.php';
         $title = ($_SESSION['userDetails']['userType'] == 'admin') ? 'Jo\'s Jobs - Admin Add Jobs' : 'Jo\'s Jobs - Client Add Jobs';
@@ -205,29 +209,29 @@ class AdminController
 
     public function editJob(): array
     {
-            $jobsTable = new DatabaseTable('job', 'id', $this->dbName);
-            if (isset($this->post['submit'])) {
-                $criteria = [
-                    'title' => $this->post['title'],
-                    'description' => $this->post['description'],
-                    'salary' => $this->post['salary'],
-                    'location' => $this->post['location'],
-                    'categoryId' => $this->post['categoryId'],
-                    'closingDate' => $this->post['closingDate'],
-                    'id' => $this->post['id'],
-                ];
+        $jobsTable = new DatabaseTable('job', 'id', $this->dbName);
+        if (isset($this->post['submit'])) {
+            $criteria = [
+                'title' => $this->post['title'],
+                'description' => $this->post['description'],
+                'salary' => $this->post['salary'],
+                'location' => $this->post['location'],
+                'categoryId' => $this->post['categoryId'],
+                'closingDate' => $this->post['closingDate'],
+                'id' => $this->post['id'],
+            ];
 
-                $updateJob = $jobsTable->update($criteria);
-                echo 'Job saved';
-            }
+            $updateJob = $jobsTable->update($criteria);
+            echo 'Job saved';
+        }
 
-            $job = $jobsTable->find('id', $this->get['id']);
+        $job = $jobsTable->find('id', $this->get['id']);
 
-            $categoriesTable = new DatabaseTable('category', 'id', $this->dbName);
-            $stmt = $categoriesTable->findAll();
+        $categoriesTable = new DatabaseTable('category', 'id', $this->dbName);
+        $stmt = $categoriesTable->findAll();
 
-            $template = ($_SESSION['userDetails']['userType'] == 'admin') ? '../templates/admin/editJob.html.php' : '../templates/client/clientEditJob.html.php';
-            $title = ($_SESSION['userDetails']['userType'] == 'admin') ? 'Jo\'s Jobs - Admin Edit Jobs' : 'Jo\'s Jobs - Client Edit Jobs';
+        $template = ($_SESSION['userDetails']['userType'] == 'admin') ? '../templates/admin/editJob.html.php' : '../templates/client/clientEditJob.html.php';
+        $title = ($_SESSION['userDetails']['userType'] == 'admin') ? 'Jo\'s Jobs - Admin Edit Jobs' : 'Jo\'s Jobs - Client Edit Jobs';
 
         return ['template' => $template,
             'variables' => ['job' => $job, 'stmt' => $stmt],
@@ -272,8 +276,8 @@ class AdminController
     public function categories(): array
     {
         $this->validation->adminValidation();
-            $categoryTable = new DatabaseTable('category', 'id', $this->dbName);
-            $categories = $categoryTable->findAll();
+        $categoryTable = new DatabaseTable('category', 'id', $this->dbName);
+        $categories = $categoryTable->findAll();
 
         return ['template' => '../templates/admin/adminCategories.html.php',
             'variables' => ['categories' => $categories],
@@ -284,22 +288,21 @@ class AdminController
     public function deleteCategories(): void
     {
         $this->validation->adminValidation();
-            $categoryTable = new DatabaseTable('category', 'id', $this->dbName);
-            $deleteCategory = $categoryTable->custom('DELETE FROM category WHERE id = :id', ['id' => $this->post['id']], true);
-
-            header('location: categories');
+        $categoryTable = new DatabaseTable('category', 'id', $this->dbName);
+        $deleteCategory = $categoryTable->delete(['id' => $this->post['id']]);
+        header('location: categories');
     }
 
     public function applicants(): array
     {
-            $jobsTable = new DatabaseTable('job', 'id', $this->dbName);
-            $job = $jobsTable->find('id', $this->get['id']);
+        $jobsTable = new DatabaseTable('job', 'id', $this->dbName);
+        $job = $jobsTable->find('id', $this->get['id']);
 
-            $stmt = 'SELECT * FROM applicants WHERE jobId = :id';
-            $applicants = $jobsTable->custom($stmt, ['id' => $this->get['id']], false);
+        $stmt = 'SELECT * FROM applicants WHERE jobId = :id';
+        $applicants = $jobsTable->custom($stmt, ['id' => $this->get['id']], false);
 
-            $template = ($_SESSION['userDetails']['userType'] == 'admin') ? '../templates/admin/applicants.html.php' : '../templates/client/clientsApplicants.html.php';
-            $title = ($_SESSION['userDetails']['userType'] == 'admin') ? 'Jo\'s Jobs - Applicants' : 'Jo\'s Jobs - Client Applicants';
+        $template = ($_SESSION['userDetails']['userType'] == 'admin') ? '../templates/admin/applicants.html.php' : '../templates/client/clientsApplicants.html.php';
+        $title = ($_SESSION['userDetails']['userType'] == 'admin') ? 'Jo\'s Jobs - Applicants' : 'Jo\'s Jobs - Client Applicants';
 
         return [
             'template' => $template,
@@ -311,22 +314,23 @@ class AdminController
     public function manageEnquiry(): array
     {
         $this->validation->adminValidation();
-            $contactTable = new DatabaseTable('contact', 'id', $this->dbName);
-            if ($this->post) {
-                if (isset($this->post['responded']) && $this->post['responded'] == 'on') {
-                    $updateResponse = ['id' => $this->post['id'], 'userId' => $_SESSION['userDetails']['userId']];
-                } else {
-                    $updateResponse = ['id' => $this->post['id'], 'userId' => NULL];
-                }
-                $contactTable->update($updateResponse);
-            }
 
-            $stmt = 'SELECT c.id, c.fullname, c.enquiry, c.email, c.phoneNumber, c.userId, u.userId as adminId
+        $contactTable = new DatabaseTable('contact', 'id', $this->dbName);
+        if ($this->post) {
+            if (isset($this->post['responded']) && $this->post['responded'] == 'on') {
+                $updateResponse = ['id' => $this->post['id'], 'userId' => $_SESSION['userDetails']['userId']];
+            } else {
+                $updateResponse = ['id' => $this->post['id'], 'userId' => NULL];
+            }
+            $contactTable->update($updateResponse);
+        }
+
+        $stmt = 'SELECT c.id, c.fullname, c.enquiry, c.email, c.phoneNumber, c.userId, u.userId as adminId
                  FROM contact c 
                  LEFT JOIN user u ON u.userId = c.userId';
-            $criteria = [];
+        $criteria = [];
 
-            $contacts = $contactTable->custom($stmt, $criteria, false);
+        $contacts = $contactTable->custom($stmt, $criteria, false);
 
         return ['template' => '../templates/admin/manageEnquiry.html.php',
             'variables' => ['contacts' => $contacts],
@@ -336,46 +340,49 @@ class AdminController
 
     public function clientIndex()
     {
+        if (isset($_SESSION['loggedin']) && $_SESSION['loggedin']) {
             return ['template' => '../templates/client/clientIndex.html.php',
                 'variables' => [],
                 'title' => 'Jo\'s Jobs - Client Home'
             ];
+        } else {
+            header("Location: ../home");
+        }
     }
 
     public function clientJobs(): array
     {
-        if (isset($_SESSION['loggedin']) && $_SESSION['loggedin']) {
-            $jobsTable = new DatabaseTable('job', 'id', $this->dbName);
+        $jobsTable = new DatabaseTable('job', 'id', $this->dbName);
 
-            $categoryTable = new DatabaseTable('category', 'id', $this->dbName);
-            $category = $categoryTable->findAll();
+        $categoryTable = new DatabaseTable('category', 'id', $this->dbName);
+        $category = $categoryTable->findAll();
 
-            $stmt = 'SELECT j.id, j.title, j.description, j.salary, j.categoryId, j.archive, j.userId, (SELECT count(*) FROM applicants WHERE jobId = j.id) as count, c.id as catId, u.userId as userId, u.userType, c.name
+        $stmt = 'SELECT j.id, j.title, j.description, j.salary, j.categoryId, j.archive, j.userId, (SELECT count(*) FROM applicants WHERE jobId = j.id) as count, c.id as catId, u.userId as userId, u.userType, c.name
                     FROM job j 
                     JOIN user u ON u.userId = j.userId
                     LEFT JOIN category c ON c.id = j.categoryId';
 
-            $criteria = [];
+        $criteria = [];
 
-            if ($_SESSION['userDetails']['userType'] == 'client') {
-                $stmt .= ' WHERE j.userId = :userId';
-                $criteria = [
-                    'userId' => $_SESSION['userDetails']['userId']
-                ];
-            }
-
-
-            if (isset($this->get['id'])) {
-                if ($_SESSION['userDetails']['userType'] == 'client') {
-                    $stmt .= ' AND j.categoryId = :id ';
-                } else {
-                    $stmt .= ' WHERE j.categoryId = :id ';
-                }
-                $criteria['id'] = $this->get['id'];
-            }
-
-            $jobs = $jobsTable->custom($stmt, $criteria, false);
+        if (isset($_SESSION['userDetails']['userType']) && $_SESSION['userDetails']['userType'] == 'client') {
+            $stmt .= ' WHERE j.userId = :userId';
+            $criteria = [
+                'userId' => $_SESSION['userDetails']['userId']
+            ];
+        } else {
+            header("Location: ../home");
         }
+
+
+        if (isset($this->get['id'])) {
+            if ($_SESSION['userDetails']['userType'] == 'client') {
+                $stmt .= ' AND j.categoryId = :id ';
+            } else {
+                $stmt .= ' WHERE j.categoryId = :id ';
+            }
+            $criteria['id'] = $this->get['id'];
+        }
+        $jobs = $jobsTable->custom($stmt, $criteria, false);
 
         return ['template' => '../templates/client/clientJobs.html.php',
             'variables' => ['jobs' => $jobs, 'category' => $category],
@@ -414,18 +421,17 @@ class AdminController
     public function editCategory(): array
     {
         $this->validation->adminValidation();
-        if (isset($_SESSION['loggedin']) && $_SESSION['loggedin']) {
-            $categoriesTable = new DatabaseTable('category', 'id', $this->dbName);
-            $currentCategory = $categoriesTable->find('id', $this->get['id']);
+        $categoriesTable = new DatabaseTable('category', 'id', $this->dbName);
+        $currentCategory = $categoriesTable->find('id', $this->get['id']);
 
-            if (isset($this->post['submit'])) {
-                $updateCategory = $categoriesTable->update(
-                    [
-                        'name' => $this->post['name'],
-                        'id' => $this->post['id']
-                    ]);
-                echo 'Category Saved';
-            }
+        if (isset($this->post['submit'])) {
+            $updateCategory = $categoriesTable->update(
+                [
+                    'name' => $this->post['name'],
+                    'id' => $this->post['id']
+                ]
+            );
+            echo 'Category Saved';
         }
 
         return ['template' => '../templates/admin/editCategory.html.php',

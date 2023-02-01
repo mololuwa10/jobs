@@ -6,7 +6,7 @@ class ManageTest
     private $dbName;
     public function truncateTable(): void
     {
-        $tableName = ['user', 'category', 'contact', 'job'];
+        $tableName = ['user', 'category', 'contact', 'job', 'applicants'];
 
         foreach ($tableName as $table) {
             $tables = new DatabaseTable($table, 'id', $this->dbName);

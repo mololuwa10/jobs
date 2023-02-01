@@ -97,16 +97,28 @@ class DatabaseTable
                 return $stmt->fetchAll();
             }
         } catch (PDOException $e) {
-            echo $e;
+            echo $e; 
         }
     }
 
-    public function truncateTable() {
-        $tableName = ['user', 'category', 'contact', 'job'];
+    public function delete($conditions = []) {
+        $sql = "DELETE FROM " . $this->table;
 
-        foreach ($tableName as $table) {
-            $table = new DatabaseTable($tableName, 'id', $this->dbName);
-            $table->custom('TRUNCATE TABLE ' . $tableName);
+        if(!empty($conditions)) {
+            $whereClause = [];
+            foreach ($conditions as $column => $value) {
+                $whereClause[] = $column ." = :" . $column;
+            }
+            $whereClause = implode(' AND ', $whereClause);
+            $sql .= " WHERE " . $whereClause;
         }
+
+        $stmt = $this->pdo->prepare($sql);
+
+        foreach ($conditions as $column => $value) {
+            $stmt->bindValue(":". $column, $value);
+        }
+
+        return $stmt->execute();
     }
 }

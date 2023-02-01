@@ -29,9 +29,9 @@ if (!isset($_SESSION) && $_SESSION['password_verified']) {
 </header>
 <?php
 if (isset($_SESSION['loggedin']) && $_SESSION['password_verified'] && $_SESSION['userDetails']['userType'] == 'admin') {
-    echo '<div class="log-out"><p>Hello, ' . $_SESSION['userDetails']['fullName'] . ' .<a href="../admin/adminIndex">Admin-Home</a> <a href="logOut">Log-out</a></div></p>';
+    echo '<div class="log-out"><p>Hello, ' . $_SESSION['userDetails']['fullName'] . ' .<a href="../admin/adminIndex">Admin-Home</a> <a href="admin/logOut">Log-out</a></div></p>';
 } else if (isset($_SESSION['loggedin']) && $_SESSION['password_verified'] && $_SESSION['userDetails']['userType'] == 'client') {
-    echo '<div class="log-out"><p>Hello, ' . $_SESSION['userDetails']['fullName'] . ' .<a href="../admin/clientIndex">Client-Home</a> <a href="logOut">Log-out</a></div></p>';
+    echo '<div class="log-out"><p>Hello, ' . $_SESSION['userDetails']['fullName'] . ' .<a href="../admin/clientIndex">Client-Home</a> <a href="admin/logOut">Log-out</a></div></p>';
 } else {
     echo '<div class="admin-login">
                    <button><a href="../admin/adminLogin" style="color: white">Admin/Client Login</a></button>

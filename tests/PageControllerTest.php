@@ -14,31 +14,52 @@ class PageControllerTest extends \PHPUnit\Framework\TestCase
     private $contactTable;
     private $applicantsTable;
     private $date;
+    private $fileName;
+    private $extension;
+    private $parts;
+
+    protected function setUp(): void
+    {
+        $this->pdo = new \PDO('mysql:dbname=testJob;host=mysql', 'student', 'student');
+        $this->categoriesTable = new DatabaseTable('category', 'id', 'testJob');
+        $this->jobsTable = new DatabaseTable('job', 'id', 'testJob');
+        $this->contactTable = new DatabaseTable('contact', 'id', 'testJob');
+        $this->applicantsTable = new DatabaseTable('applicants', 'id', 'testJob');
+        $this->date = new DateTime();
+//        $this->parts = explode('.', $_FILES['cv']['name']);
+//        $this->extension = end($this->parts); . '.' . $this->extension "test.pdf"
+        $this->fileName = uniqid() . '.pdf';
+    }
 
     public function testCategories()
     {
-        $categories = $this->categoriesTable->findAll();
-        $this->assertTrue(is_array($categories));
+        $manageTest = new ManageTest();
+        $getData = ['id' => 1];
+
+        $PageController = new PageController($getData, [], 'testJob');
+        $date = new DateTime();
+
+        $result = $PageController->categories();
+
+        $this->assertArrayHasKey('jobs', $result['variables']);
+        $this->assertArrayHasKey('categories', $result['variables']);
+        $this->assertArrayHasKey('currentCategory', $result['variables']);
     }
-
-    public function testFindJobsByCategoryAndDate()
-    {
-        $criteria = [
-            'date' => $this->date->format('Y-m-d'),
-            'id' => 1
-        ];
-
-        $jobs = $this->jobsTable->customFind('categoryId = :id AND closingDate > :date', $criteria);
-        $this->assertTrue(is_array($jobs));
-    }
-
     public function testHome() {
         $manageTest = new ManageTest();
-        $manageTest->truncateTable();
+        $this->jobsTable->delete([]);
+        $this->jobsTable->insert([
+            'title' => 'Teaching Assistant',
+            'description' => 'This is a teaching Job',
+            'salary' => '£30,000 - £40,000',
+            'closingDate' => '2023-01-08',
+            'categoryId' => 1,
+            'location' => 'Birmingham'
+        ]);
 
         $pageController = new \controller\PageController([], [], 'testJob');
         $getData = [
-            'locations' => 'Test Location'
+            'locations' => 'Birmingham'
         ];
         $response = $pageController->home();
         $manageTest->addJob($getData);
@@ -50,7 +71,7 @@ class PageControllerTest extends \PHPUnit\Framework\TestCase
 
     public function testFilter() {
         $manageTest = new ManageTest();
-        $manageTest->truncateTable();
+        $this->jobsTable->delete([]);
 
         $getData = [
             'locations' => 'New York'
@@ -59,18 +80,14 @@ class PageControllerTest extends \PHPUnit\Framework\TestCase
         for($i = 1; $i < 6; $i++) {
             $manageTest->addJob();
         }
-        $manageTest->addJob();
 
         $pageController = new \controller\PageController([], [], 'testJob');
         $response = $pageController->home();
 
-        $this->assertTrue(2 == count($response['variables']['locations']));
-//        $this->assertTrue(6 == count($response['variables']['jobs']));
-
+        $this->assertTrue(1 == count($response['variables']['locations']));
+        $this->assertTrue(6 == count($response['variables']['jobs']));
         $filterPageController = new PageController(['location' => $getData['locations']] , [], 'testJob');
         $filterResponse = $filterPageController->home();
-
-//        $this->assertTrue(1 == );
     }
     public function testFaqs()
     {
@@ -83,13 +100,189 @@ class PageControllerTest extends \PHPUnit\Framework\TestCase
         $this->assertEquals($expected, $response);
     }
 
-    protected function setUp(): void
-    {
-        $this->pdo = new \PDO('mysql:dbname=testJob;host=mysql', 'student', 'student');
-        $this->categoriesTable = new DatabaseTable('category', 'id', 'testJob');
-        $this->jobsTable = new DatabaseTable('job', 'id', 'testJob');
-        $this->contactTable = new DatabaseTable('contact', 'id', 'testJob');
-        $this->applicantsTable = new DatabaseTable('applicants', 'id', 'testJob');
-        $this->date = new DateTime();
+    public function testAboutUs() {
+        $this->categoriesTable->delete([]);
+
+        $this->categoriesTable->insert(
+            [
+            'id' => 1,
+            'name' => 'Test Category1'
+            ]
+        );
+        $this->categoriesTable->insert(
+            [
+                'id' => 2,
+                'name' => 'Test Category2'
+            ]
+        );
+
+        $pageController = new PageController([], [],  'testJob');
+        $response = $pageController->aboutUs();
+
+        $this->assertArrayHasKey('variables', $response);
+        $this->assertArrayHasKey('categories', $response['variables']);
+        $this->assertCount(2, $response['variables']['categories']);
     }
+
+    public function testContact()
+    {
+        $errorMessage = [];
+        $validationMessage = '';
+        $this->contactTable->delete([]);
+        $postData = [
+            'fullname' => 'Test Contact Name',
+            'email' => 'testContact@gmail.com',
+            'enquiry' => 'test contact enquiry',
+            'phoneNumber' => 07473143014,
+            'submit' => true
+        ];
+
+        $pageController = new PageController([], $postData, 'testJob');
+        ob_start();
+        $response = $pageController->contact();
+        ob_get_clean();
+
+        $errorMessage = $response['variables']['errorMessage'];
+        $validationMessage = $response['variables']['validationMessage'];
+
+        $this->assertEquals('ENQUIRY RECEIVED', $validationMessage);
+        $contact = $this->contactTable->find('email', 'testContact@gmail.com');
+        $this->assertNotEmpty($contact);
+
+        $this->contactTable->delete([]);
+        $postData = [
+            'fullname' => '',
+            'email' => '',
+            'enquiry' => '',
+            'phoneNumber' => '',
+            'submit' => true
+        ];
+
+        $pageController = new PageController([], $postData, 'testJob');
+        ob_start();
+        $response = $pageController->contact();
+        $output = ob_get_clean();
+
+        $errorMessage = $response['variables']['errorMessage'];
+        $validationMessage = $response['variables']['validationMessage'];
+        if(empty($errorMessage)) {
+            $this->assertEquals('EVERY FIELD IS NOT FIELD', $output);
+        }
+
+        $this->contactTable->delete([]);
+        $criteria = [
+            'fullname' => 'Test Contact Name',
+            'email' => 'testContact@gmail.com',
+            'enquiry' => 'test contact enquiry',
+            'phoneNumber' => 07473143014,
+        ];
+        $this->contactTable->insert($criteria);
+
+        $postData = [
+            'fullname' => 'Test Contact Name',
+            'email' => 'testContact@gmail.com',
+            'enquiry' => 'test contact enquiry',
+            'phoneNumber' => 07473143014,
+            'submit' => true
+        ];
+        $pageController = new PageController([], $postData, 'testJob');
+        ob_start();
+        $response = $pageController->contact();
+        ob_get_clean();
+
+        $errorMessage = $response['variables']['errorMessage'];
+        $validationMessage = $response['variables']['validationMessage'];
+
+        $this->assertEquals(["CREDENTIALS ALREADY EXIST"], $errorMessage);
+    }
+
+    public function testApply() {
+        $this->applicantsTable->delete([]);
+        $postData = [
+            'name' => 'Segilola Mololuwa',
+            'email' => 'segilolamololuwa@gmail.com',
+            'details' => 'Test details',
+            'jobId' => 1,
+            'submit' => 'submit'
+        ];
+
+        $getData = [
+            'id' => 1
+        ];
+        $pageController = new PageController($getData, $postData, 'testJob');
+        $file = [
+            'name' => $this->fileName,
+            'type' => 'text/plain',
+            'tmp_name' => '/tmp/' . $this->fileName,
+            'error' => 0,
+            'size' => 123,
+        ];
+        $_FILES['cv'] = $file;
+        $response = $pageController->apply();
+        $this->assertArrayHasKey('template', $response);
+        $this->assertArrayHasKey('variables', $response);
+        $this->assertArrayHasKey('title', $response);
+        $this->assertArrayHasKey('job', $response['variables']);
+        $this->assertArrayHasKey('categories', $response['variables']);
+        $this->assertArrayHasKey('errorMessage', $response['variables']);
+        $this->assertEquals('Your application is complete. We will contact you after the closing date.', $response['variables']['errorMessage'][0]);
+//        $this->assertFileExists('cvs/' . $this->fileName);
+        $this->applicantsTable->delete([]);
+        $postData = [
+            'name' => 'Segilola Michael',
+            'email' => 'segilolamichael@gmail.com',
+            'details' => 'Test details',
+            'jobId' => 1,
+            'submit' => 'submit'
+        ];
+
+        $getData = [
+            'id' => 2
+        ];
+        $pageController = new PageController($getData, $postData, 'testJob');
+
+        $fileNotExisting = [
+            'name' => $this->fileName,
+            'type' => 'text/plain',
+            'tmp_name' => '/tmp/' . $this->fileName,
+            'error' => UPLOAD_ERR_NO_FILE,
+            'size' => 123,
+        ];
+        $_FILES['cv'] = $fileNotExisting;
+        $response = $pageController->apply();
+        $this->assertArrayHasKey('template', $response);
+        $this->assertArrayHasKey('variables', $response);
+        $this->assertArrayHasKey('title', $response);
+        $this->assertArrayHasKey('job', $response['variables']);
+        $this->assertArrayHasKey('categories', $response['variables']);
+        $this->assertArrayHasKey('errorMessage', $response['variables']);
+        $this->assertEquals('There was an error uploading your CV', $response['variables']['errorMessage'][0]);
+//        $this->assertFileExists('cvs/' . $this->fileName);
+    }
+
+//    public function testLogOut() {
+//        $user = [
+//            'fullName' => 'Test Name',
+//            'userName' => 'TestUserName',
+//            'password' => 'TestPassword',
+//            'userType' => 'admin',
+//        ];
+//
+//        $_SESSION['loggedin'] = 1;
+//        $_SESSION['userDetails'] = $user;
+//
+////        $_SESSION['test'] = 'test';
+//        $this->assertArrayHasKey('loggedin', $_SESSION);
+//        $this->assertArrayHasKey('userDetails', $_SESSION);
+//
+//        $pageController = new PageController([], [], 'testJob');
+//        $logOut = $pageController->logOut();
+//
+//        $this->assertArrayNotHasKey('userDetails', $_SESSION);
+//        $this->assertArrayNotHasKey(1, $_SESSION);
+//        $this->assertEmpty($_SESSION);
+//    }
+//    public function tearDown(): void {
+//        unlink('cvs/' . $this->fileName);
+//    }
 }

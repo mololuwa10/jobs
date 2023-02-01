@@ -14,7 +14,7 @@
         <ul class="listing">
             <form action="contact" method="post" style="padding: 40px">
                 <label>Full Name: </label>
-                <input type="text" name="fullName"/>
+                <input type="text" name="fullname"/>
 
                 <label>Email Address: </label>
                 <input type="email" name="email"/>
