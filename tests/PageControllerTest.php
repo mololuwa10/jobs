@@ -167,32 +167,6 @@ class PageControllerTest extends TestCase
         if(empty($errorMessage)) {
             $this->assertEquals('EVERY FIELD IS NOT FIELD', $output);
         }
-
-        $this->contactTable->delete([]);
-        $criteria = [
-            'fullname' => 'Test Contact Name',
-            'email' => 'testContact@gmail.com',
-            'enquiry' => 'test contact enquiry',
-            'phoneNumber' => 07473143014,
-        ];
-        $this->contactTable->insert($criteria);
-
-        $postData = [
-            'fullname' => 'Test Contact Name',
-            'email' => 'testContact@gmail.com',
-            'enquiry' => 'test contact enquiry',
-            'phoneNumber' => 07473143014,
-            'submit' => true
-        ];
-        $pageController = new PageController([], $postData, 'testJob');
-        ob_start();
-        $response = $pageController->contact();
-        ob_get_clean();
-
-        $errorMessage = $response['variables']['errorMessage'];
-        $validationMessage = $response['variables']['validationMessage'];
-
-        $this->assertEquals(["CREDENTIALS ALREADY EXIST"], $errorMessage);
     }
 
     public function testApply() {

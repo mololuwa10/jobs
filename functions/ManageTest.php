@@ -21,7 +21,7 @@ class ManageTest
             'title' => $jobData['title'] ?? 'Teaching Assistant',
             'description' => $jobData['description'] ?? 'You will be assisting a teacher',
             'salary' => $jobData['salary'] ?? '£30,000 - £40,000',
-            'closingDate' => $jobData['closingDate'] ?? '2023-01-08',
+            'closingDate' => $jobData['closingDate'] ?? '2023-04-08',
             'categoryId' => $jobData['categoryId'] ?? 1,
             'location' => $jobData['location'] ?? 'Birmingham'
         ];

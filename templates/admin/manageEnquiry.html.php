@@ -18,6 +18,7 @@
         echo '<th style="width: 5%">&nbsp;</th>';
         echo '</tr>';
 
+        $contacts = $contacts ?? [];
         foreach ($contacts as $contact) {
             echo '<tr>';
             echo '<td style="text-align: center">' . $contact['id'] . '</td>';

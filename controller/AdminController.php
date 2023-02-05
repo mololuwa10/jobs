@@ -62,7 +62,7 @@ class AdminController
         ];
     }
 
-    public function adminIndex()
+    public function adminIndex(): array
     {
         $this->validation->adminValidation();
 
@@ -317,7 +317,6 @@ class AdminController
     public function manageEnquiry(): array
     {
         $this->validation->adminValidation();
-
         $contactTable = new DatabaseTable('contact', 'id', $this->dbName);
         if ($this->post) {
             if (isset($this->post['responded']) && $this->post['responded'] == 'on') {

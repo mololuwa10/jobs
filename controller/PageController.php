@@ -55,15 +55,18 @@ class PageController
 
         $locations = $jobsTable->custom('SELECT DISTINCT location FROM job', [], false);
         $criteria = [];
+        $date = new DateTime();
 
         $stmt = 'SELECT j.*, c.id as catId
         FROM job j
         LEFT JOIN category c ON c.id = j.categoryId
-        WHERE (j.archive = 0 OR j.archive IS NULL)';
+        WHERE j.archive = 0 OR j.archive IS NULL AND j.closingDate > :date';
+
+        $criteria["date"] = $date->format('Y-m-d');
 
         if (isset($this->get["location"]) && $this->get["location"] != 'All') {
             $stmt .= ' AND j.location = :location';
-            $criteria = ["location" => $this->get["location"]];
+            $criteria["location"] = $this->get["location"];
         }
 
         $stmt .= ' ORDER BY j.closingDate ASC LIMIT 10';
@@ -108,11 +111,6 @@ class PageController
             }
             if (empty($errorMessage)) {
                 $contactTable = new DatabaseTable('contact', 'id', $this->dbName);
-                $contact = $contactTable->find('email', $email);
-
-                if ($contact) {
-                    $errorMessage[] = "CREDENTIALS ALREADY EXIST";
-                } else {
                     $criteria = [
                         'fullname' => $fullName,
                         'email' => $email,
@@ -120,8 +118,8 @@ class PageController
                         'phoneNumber' => $phoneNumber
                     ];
                     $addEnquiry = $contactTable->insert($criteria);
+
                     $validationMessage = 'ENQUIRY RECEIVED';
-                }
             }
         }
 
