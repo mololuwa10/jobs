@@ -225,7 +225,6 @@ class PageControllerTest extends TestCase
         $this->assertArrayHasKey('categories', $response['variables']);
         $this->assertArrayHasKey('errorMessage', $response['variables']);
         $this->assertEquals('Your application is complete. We will contact you after the closing date.', $response['variables']['errorMessage'][0]);
-//        $this->assertFileExists('cvs/' . $this->fileName);
         $this->applicantsTable->delete([]);
         $postData = [
             'name' => 'Segilola Michael',
@@ -256,32 +255,5 @@ class PageControllerTest extends TestCase
         $this->assertArrayHasKey('categories', $response['variables']);
         $this->assertArrayHasKey('errorMessage', $response['variables']);
         $this->assertEquals('There was an error uploading your CV', $response['variables']['errorMessage'][0]);
-//        $this->assertFileExists('cvs/' . $this->fileName);
     }
-
-//    public function testLogOut() {
-//        $user = [
-//            'fullName' => 'Test Name',
-//            'userName' => 'TestUserName',
-//            'password' => 'TestPassword',
-//            'userType' => 'admin',
-//        ];
-//
-//        $_SESSION['loggedin'] = 1;
-//        $_SESSION['userDetails'] = $user;
-//
-////        $_SESSION['test'] = 'test';
-//        $this->assertArrayHasKey('loggedin', $_SESSION);
-//        $this->assertArrayHasKey('userDetails', $_SESSION);
-//
-//        $pageController = new PageController([], [], 'testJob');
-//        $logOut = $pageController->logOut();
-//
-//        $this->assertArrayNotHasKey('userDetails', $_SESSION);
-//        $this->assertArrayNotHasKey(1, $_SESSION);
-//        $this->assertEmpty($_SESSION);
-//    }
-//    public function tearDown(): void {
-//        unlink('cvs/' . $this->fileName);
-//    }
 }

@@ -168,14 +168,5 @@ class PageController
             'title' => 'Jo\'s Jobs - Apply'
         ];
     }
-//
-//    public function logOut(): void
-//    {
-//        if (!isset($_SESSION)) {
-//            session_start();
-//        }
-//        unset($_SESSION);
-//        session_destroy();
-//        header("Location: ../home");
-//    }
+
 }

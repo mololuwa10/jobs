@@ -35,81 +35,82 @@ class AdminControllerTest extends TestCase
     // https://stackoverflow.com/questions/14152608/headers-already-sent-error-returned-during-phpunit-tests
 
     public function testAdminLogin() {
-//        $this->usersTable->delete([]);
-//        $userAdmin = [
-//            'userId' => 1,
-//            'userName' => 'testUserName',
-//            'fullName' => 'Test Name',
-//            'password' => password_hash('testPassword', PASSWORD_DEFAULT),
-//            'userType' => 'admin'
-//        ];
-//
-//        $userClient = [
-//            'userId' => 2,
-//            'userName' => 'testUserClient',
-//            'fullName' => 'Test Name Client',
-//            'password' => password_hash('testPasswordClient', PASSWORD_DEFAULT),
-//            'userType' => 'client'
-//        ];
-//        $this->usersTable->insert($userAdmin);
-//        $this->usersTable->insert($userClient);
-//
+        $this->usersTable->delete([]);
+        $userAdmin = [
+            'userId' => 1,
+            'userName' => 'testUserName',
+            'fullName' => 'Test Name',
+            'password' => password_hash('testPassword', PASSWORD_DEFAULT),
+            'userType' => 'admin'
+        ];
+
+        $userClient = [
+            'userId' => 2,
+            'userName' => 'testUserClient',
+            'fullName' => 'Test Name Client',
+            'password' => password_hash('testPasswordClient', PASSWORD_DEFAULT),
+            'userType' => 'client'
+        ];
+        $this->usersTable->insert($userAdmin);
+        $this->usersTable->insert($userClient);
+
+        $postData = [
+            'submit' => 'submit',
+            'userName' => 'testUserName',
+            'password' => 'testPassword'
+        ];
+        $_SESSION['loggedin'] = $userAdmin['userId'];
+        var_dump($userAdmin['userId']);
+        $_SESSION['userDetails'] = [
+            'userName' => $userAdmin['userName'],
+            'fullName' => $userAdmin['fullName'],
+            'userType' => $userAdmin['userType']
+        ];
+
+        $adminController = new AdminController([], $postData, 'testJob');
+        $response = $adminController->adminLogin();
+
+        $this->assertArrayHasKey('template', $response);
+        $this->assertArrayHasKey('variables', $response);
+        $this->assertArrayHasKey('title', $response);
+        $this->assertArrayHasKey('errMsgArray', $response['variables']);
+        $this->assertEquals('userId', $_SESSION['loggedin']);
+        $this->assertEquals('testUserName', $_SESSION['userDetails']['userName']);
+        $this->assertEquals('admin', $_SESSION['userDetails']['userType']);
+        $this->assertTrue($_SESSION['password_verified']);
+        $this->assertEquals('../templates/admin/adminIndex.html.php', $response['template']);
 //        $postData = [
 //            'submit' => 'submit',
 //            'userName' => 'testUserName',
 //            'password' => 'testPassword'
 //        ];
-//        $_SESSION['loggedin'] = $userAdmin['userId'];
-//        $_SESSION['userDetails'] = [
-//            'userName' => $userAdmin['userName'],
-//            'fullName' => $userAdmin['fullName'],
-//            'userType' => $userAdmin['userType']
-//        ];
-//
 //        $adminController = new AdminController([], $postData, 'testJob');
 //        $response = $adminController->adminLogin();
 //
-//        $this->assertArrayHasKey('template', $response);
-//        $this->assertArrayHasKey('variables', $response);
-//        $this->assertArrayHasKey('title', $response);
-//        $this->assertArrayHasKey('errMsgArray', $response['variables']);
-//        $this->assertEquals('userId', $_SESSION['loggedin']);
-//        $this->assertEquals('testUserName', $_SESSION['userDetails']['userName']);
-//        $this->assertEquals('admin', $_SESSION['userDetails']['userType']);
-//        $this->assertTrue($_SESSION['password_verified']);
-//        $this->assertEquals('../templates/admin/adminIndex.html.php', $response['template']);
-//        $postData = [
-//            'submit' => 'submit',
-//            'userName' => 'testUserName',
-//            'password' => 'testPassword'
-//        ];
-//        $adminController = new AdminController([], $postData, 'testJob');
-//        $response = $adminController->adminLogin();
-//
-//        $this->assertEquals(['template' => '../templates/admin/adminLogin.html.php',
+//        $this->assertEquals((int)['template' => '../templates/admin/adminLogin.html.php',
 //            'variables' => ['errMsgArray' => []],
 //            'title' => 'Jo\'s Jobs - Admin Login'], $response);
-//
-//        $postData = [
-//            'userName' => 'wrongUserName',
-//            'password' => 'wrongPassword'
-//        ];
-//        $adminController = new AdminController([], $postData, 'testJob');
-//        $response = $adminController->adminLogin();
-//        $this->assertEquals(['template' => '../templates/admin/adminLogin.html.php',
-//            'variables' => ['errMsgArray' => ['CREDENTIALS ARE WRONG!! TRY AGAIN']],
-//            'title' => 'Jo\'s Jobs - Admin Login'], $response);
-//
-//        // Case when no credentials are entered
-//        $postData = [
-//            'userName' => '',
-//            'password' => ''
-//        ];
-//        $adminController = new AdminController([], $postData, 'testJob');
-//        $response = $adminController->adminLogin();
-//        $this->assertEquals(['template' => '../templates/admin/adminLogin.html.php',
-//            'variables' => ['errMsgArray' => ['YOU MUST ENTER A VALID CREDENTIAL']],
-//            'title' => 'Jo\'s Jobs - Admin Login'], $response);
+
+        $postData = [
+            'userName' => 'wrongUserName',
+            'password' => 'wrongPassword'
+        ];
+        $adminController = new AdminController([], $postData, 'testJob');
+        $response = $adminController->adminLogin();
+        $this->assertEquals((int)['template' => '../templates/admin/adminLogin.html.php',
+            'variables' => ['errMsgArray' => ['CREDENTIALS ARE WRONG!! TRY AGAIN']],
+            'title' => 'Jo\'s Jobs - Admin Login'], $response);
+
+        // Case when no credentials are entered
+        $postData = [
+            'userName' => '',
+            'password' => ''
+        ];
+        $adminController = new AdminController([], $postData, 'testJob');
+        $response = $adminController->adminLogin();
+        $this->assertEquals((int)['template' => '../templates/admin/adminLogin.html.php',
+            'variables' => ['errMsgArray' => ['YOU MUST ENTER A VALID CREDENTIAL']],
+            'title' => 'Jo\'s Jobs - Admin Login'], $response);
     }
 
 //    public function testAdminLogin() {
@@ -118,6 +119,7 @@ class AdminControllerTest extends TestCase
 //            'username' => 'testuser',
 //            'password' => 'testpassword'
 //        ];
+//        $_SESSION['loggedin'] = $postData;
 //        $adminController = new AdminController([], $postData, 'testJob');
 //        $result = $adminController->adminLogin();
 //        $this->assertEquals($_SESSION['loggedin'], 'expectedUserId');
@@ -314,8 +316,7 @@ class AdminControllerTest extends TestCase
     // https://stackoverflow.com/questions/14152608/headers-already-sent-error-returned-during-phpunit-tests
     public function testAddCategory()
     {
-        $truncateTable = new ManageTest();
-        $truncateTable->truncateTable();
+        $this->categoriesTable->delete([]);
 
         $postData = [
             'submit' => true,

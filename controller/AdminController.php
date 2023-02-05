@@ -85,7 +85,7 @@ class AdminController
 
         $criteria = [];
 
-        if (isset($this->get['id'])) {
+        if (isset($this->get['id']) && $this->get["id"] != 'All') {
             $stmt .= ' WHERE j.categoryId = :id';
             $criteria = ['id' => $this->get['id']];
         }
@@ -393,33 +393,6 @@ class AdminController
         ];
     }
 
-//    public function clientAddJob(): array
-//    {
-//        if (isset($_SESSION['loggedin']) && $_SESSION['loggedin']) {
-//            $categoriesTable = new DatabaseTable('category', 'id', $this->dbName);
-//            $categories = $categoriesTable->findAll();
-//
-//            if (isset($this->post['submit'])) {
-//                $jobsTable = new DatabaseTable('job', 'id', $this->dbName);
-//                $criteria = [
-//                    'title' => $this->post['title'],
-//                    'description' => $this->post['description'],
-//                    'salary' => $this->post['salary'],
-//                    'location' => $this->post['location'],
-//                    'categoryId' => $this->post['categoryId'],
-//                    'closingDate' => $this->post['closingDate'],
-//                    'userId' => $_SESSION['userDetails']['userId']
-//                ];
-//                $jobs = $jobsTable->save($criteria);
-//                echo 'Job Added';
-//            }
-//        }
-//
-//        return ['template' => '../templates/client/clientAddJob.html.php',
-//            'variables' => ['categories' => $categories],
-//            'title' => 'Jo\'s Jobs - Client Add Job'
-//        ];
-//    }
 
     public function editCategory(): array
     {
