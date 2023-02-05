@@ -3,11 +3,12 @@
 use Database\DatabaseTable;
 use functions\ManageTest;
 use controller\PageController;
+use PHPUnit\Framework\TestCase;
 
 /**
  * @covers controller\PageController
  */
-class PageControllerTest extends \PHPUnit\Framework\TestCase
+class PageControllerTest extends TestCase
 {
     private $categoriesTable;
     private $jobsTable;
@@ -26,8 +27,6 @@ class PageControllerTest extends \PHPUnit\Framework\TestCase
         $this->contactTable = new DatabaseTable('contact', 'id', 'testJob');
         $this->applicantsTable = new DatabaseTable('applicants', 'id', 'testJob');
         $this->date = new DateTime();
-//        $this->parts = explode('.', $_FILES['cv']['name']);
-//        $this->extension = end($this->parts); . '.' . $this->extension "test.pdf"
         $this->fileName = uniqid() . '.pdf';
     }
 

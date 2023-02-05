@@ -4,6 +4,7 @@ namespace controller;
 
 use Database\AdminValidation;
 use Database\DatabaseTable;
+use JetBrains\PhpStorm\NoReturn;
 
 class AdminController
 {
@@ -15,7 +16,6 @@ class AdminController
      */
     private $dbName;
     private $validation;
-
     public function __construct(array $get, array $post, $dbName = 'job')
     {
         $this->get = $get;
@@ -29,7 +29,7 @@ class AdminController
         $errMsgArray = [];
         $errorFlag = false;
         if (isset($this->post['submit'])) {
-            $userName = $this->post['username'];
+            $userName = $this->post['userName'];
             $password = $this->post['password'];
 
             if ($userName == '' || $password == '') {
@@ -51,14 +51,13 @@ class AdminController
                     }
                 } else {
                     $_SESSION['password_verified'] = false;
-                    echo 'CREDENTIALS ARE WRONG!! TRY AGAIN';
+                    $errMsgArray[] = 'CREDENTIALS ARE WRONG!! TRY AGAIN';
                     $errorFlag = true;
                 }
             }
-
         }
         return ['template' => '../templates/admin/adminLogin.html.php',
-            'variables' => [],
+            'variables' => ['errMsgArray' => $errMsgArray],
             'title' => 'Jo\'s Jobs - Admin Login'
         ];
     }
@@ -147,19 +146,23 @@ class AdminController
         ];
     }
 
-    public function manageUser()
+    /**
+     * @return array
+     */
+    public function manageUser(): array
     {
         $this->validation->adminValidation();
-        if (isset($_SESSION['loggedin']) && $_SESSION['loggedin']) {
             $userTable = new DatabaseTable('user', 'userId', $this->dbName);
             $users = $userTable->findAll();
             return ['template' => '../templates/admin/manageUser.html.php',
                 'variables' => ['users' => $users],
                 'title' => 'Jo\'s Jobs - Manage User'
             ];
-        }
     }
 
+    /**
+     * @return void
+     */
     public function deleteUser(): void
     {
         $userTable = new DatabaseTable('user', 'userId', $this->dbName);
