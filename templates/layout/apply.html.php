@@ -3,6 +3,7 @@
         <ul>
             <?php
             $categories = $categories ?? [];
+            $job = $job ?? [];
             foreach ($categories as $c) {
                 echo '<li><a href="categories?id=' . $c['id'] . '">' . $c['name'] . '</a></li>';
             }

@@ -1,5 +1,7 @@
 <main class="sidebar">
-    <?php require 'client-sidebar.html.php' ?>
+    <?php require 'client-sidebar.html.php';
+    $job = $job ?? [];
+    ?>
     <section class="right">
         <h2>Edit Job</h2>
         <form action="" method="POST">

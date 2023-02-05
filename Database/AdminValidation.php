@@ -22,7 +22,4 @@ class AdminValidation
         }
     }
 
-//    public function clientValidation() {
-//
-//    }
 }

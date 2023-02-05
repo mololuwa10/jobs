@@ -8,7 +8,10 @@
         <div>
             <form action="clientJobs" class="job-filter" method="get">
                 <select name="id">
+                    <option disabled selected>Filter By Category: </option>
+                    <option value="All">All Categories</option>
                     <?php
+                    $category = $category ?? [];
                     foreach ($category as $row) {
                         echo '<option value =' . $row['id'] . '>' . 'Filter By Category: ' . $row['name'] . '</option>';
                     }

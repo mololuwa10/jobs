@@ -14,7 +14,8 @@ class ManageTest
         }
     }
 
-    public function addJob($jobData = []) {
+    public function addJob($jobData = []): void
+    {
         $jobsTable = new DatabaseTable('job', 'id', 'testJob');
         $criteria = [
             'title' => $jobData['title'] ?? 'Teaching Assistant',

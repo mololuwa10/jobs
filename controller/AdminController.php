@@ -377,7 +377,7 @@ class AdminController
         }
 
 
-        if (isset($this->get['id'])) {
+        if (isset($this->get['id']) && $this->get["id"] != 'All') {
             if ($_SESSION['userDetails']['userType'] == 'client') {
                 $stmt .= ' AND j.categoryId = :id ';
             } else {

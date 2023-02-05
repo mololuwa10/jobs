@@ -21,6 +21,7 @@
 
             <select name="categoryId">
                 <?php
+                $categories = $categories ?? [];
                 foreach ($categories as $category) {
                     echo '<option value="' . $category['id'] . '">' . $category['name'] . '</option>';
                 }

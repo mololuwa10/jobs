@@ -8,6 +8,7 @@
                 <option disabled selected>Filter By Location: </option>
                 <option value="All">All Locations</option>
                 <?php
+                $locations = $locations ?? [];
                 foreach ($locations as $location) {
                     echo '<option value=' . $location['location'] . '>' . 'Filter By Location: ' . $location['location'] . '</option>';
                 }
@@ -21,6 +22,7 @@
 
     <ul class="job-listing">
         <?php
+        $jobs = $jobs ?? [];
         foreach ($jobs as $job) {
             echo '<li>';
             echo '<div class="details">';
